@@ -1,11 +1,19 @@
+
+
+
+    
+        
+    
+
+
+
+
 <!DOCTYPE HTML>
 
 <html>
     <head>
         
-            
-                <title>gresch</title>
-            
+            <title>BPMN Posts - gresch</title>
         
 
         <meta charset="utf-8" />
@@ -22,10 +30,10 @@
         
 
         
-        <meta property="og:title" content="gresch" />
+        <meta property="og:title" content="BPMN" />
 <meta property="og:description" content="Adventures in Datascience; A strategic consultant turning into a datascientist" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="/" />
+<meta property="og:url" content="/categories/bpmn/" />
 
 
 <meta property="og:updated_time" content="2016-09-22T08:42:35&#43;02:00"/>
@@ -39,7 +47,7 @@
 
 
         
-<meta itemprop="name" content="gresch">
+<meta itemprop="name" content="BPMN">
 <meta itemprop="description" content="Adventures in Datascience; A strategic consultant turning into a datascientist">
 
 
@@ -83,10 +91,9 @@
         <div id="wrapper">
 
     
-    
 <header id="header">
     
-        <h1><a href="/">gresch</i></a></h1>
+        <h2><a href="/">gresch</i></a></h2>
     
 
     <nav class="links">
@@ -115,10 +122,6 @@
     </nav>
     <nav class="main">
         <ul>
-            
-            <li id="share-nav" class="share-menu" style="display:none;">
-                <a class="fa-share-alt" href="#share-menu">Share</a>
-            </li>
             
             <li class="search">
                 <a class="fa-search" href="#search">Search</a>
@@ -205,6 +208,8 @@
 
     
     <div id="main">
+        <h1>BPMN</h1>
+        
         
             <article class="post">
     <header>
@@ -232,55 +237,6 @@
     </div>
 </header>
 
-
-    <section id="social-share">
-        <ul class="icons">
-            
-
-
-<li><a href="//twitter.com/share?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&text=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams&via=gre__sch" target="_blank" class="share-btn twitter">
-    <i class="fa fa-twitter"></i>
-    <p>Twitter</p>
-</a></li>
-
-
-<li><a href="//plus.google.com/share?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn google-plus">
-    <i class="fa fa-google-plus"></i>
-    <p>Google+</p>
-</a></li>
-
-
-<li><a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn facebook">
-    <i class="fa fa-facebook"></i>
-    <p>Facebook</p>
-</a></li>
-
-
-<li><a href="//reddit.com/submit?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn reddit">
-    <i class="fa fa-reddit-alien"></i>
-    <p>Reddit</p>
-</a></li>
-
-
-<li><a href="//www.linkedin.com/shareArticle?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn linkedin">
-    <i class="fa fa-linkedin"></i>
-    <p>LinkedIn</p>
-</a></li>
-
-
-<li><a href="//www.stumbleupon.com/submit?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn stumbleupon">
-    <i class="fa fa-stumbleupon"></i>
-    <p>StumbleUpon</p>
-</a></li>
-
-
-<li><a href="mailto:?subject=Check out this post by gresch&body=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn email">
-    <i class="fa fa-envelope"></i>
-    <p>Email</p>
-</a></li>
-
-        </ul>
-    </section>
     
     
 
@@ -305,43 +261,12 @@
     
 
 
-    <div id="content">
-        
-
-<h1 id="introduction">Introduction</h1>
-
-<p>yEd is a modeling tool to model different types of graphs, including BPMN diagrams. Contrary to database-oriented modeling tools, yEd is a file-oriented tool. It saves the diagram in an XML file (GraphML). In case one models diagrams with more than 100 elements, consistency checks and spell checks can become cumbersome and time consuming.</p>
-
-<p>I prepared an R script that tries to reduce the effort by fetching the names and types of the modeled BPMN elements and make them available as a spreadsheet file. This spreadsheet may support you in the following activities:</p>
-
-<ul>
-<li>Spellcheck</li>
-<li>Check of consistent naming of process activities, business objects, and events</li>
-<li>Process complexity estimation, e.g., based on the number of activities or used gateways</li>
-</ul>
-
-<p>If you are interested to learn more about the R script, do not hesitate to contact me.</p>
-
-<h1 id="used-tools">Used tools</h1>
-
-<ul>
-<li><a href="http://www.yworks.com/en/products_yed_download.html">yEd - Graph Editor</a></li>
-<li><a href="https://www.rstudio.com/">RStudio</a></li>
-<li><a href="https://products.office.com/en-us/excel">MS Excel</a></li>
-<li><a href="https://github.com/gresch/GraphMLBPMNtoSpreadsheet">Link to the R script</a></li>
-</ul>
-
-<h1 id="process-example">Process example</h1>
-
-<p><img src="/img/2016/09/ExampleBPMNDiagram.jpg" alt="ExampleProcess" /></p>
-
-<h1 id="result">Result</h1>
-
-<p><img src="/img/2016/09/ExampleBPMNXLS.jpg" alt="ExampleProcess" /> <img src="/img/2016/09/ExampleBPMNPivot.jpg" alt="ExampleProcess" /></p>
-
-    </div>
+    <p>Introduction yEd is a modeling tool to model different types of graphs, including BPMN diagrams. Contrary to database-oriented modeling tools, yEd is a file-oriented tool. It saves the diagram in an XML file (GraphML). In case one models diagrams with more than 100 elements, consistency checks and spell checks can become cumbersome and time consuming. I prepared an R script that tries to reduce the effort by fetching the names and types of the modeled BPMN elements and make them available as a spreadsheet file.</p>
 
     <footer>
+        <ul class="actions">
+            <li><a href="/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/" class="button big">Continue Reading</a></li>
+        </ul>
         <ul class="stats">
     
         
@@ -375,91 +300,20 @@
 
     </footer>
 </article>
+
+        
+
+        
 <ul class="actions pagination">
     
+        <li><a href="#" class="disabled button big previous">Previous Page</a></li>
+    
 
+    
+        <li><a href="#" class="disabled button big next">Next Page</a></li>
     
 </ul>
 
-
-
-    
-        <article class="post">
-            <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'greschblog';
-    var disqus_identifier = '\/blog\/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams\/';
-    var disqus_title = 'Data Science - R Script to Analyze BPMN Diagrams';
-    var disqus_url = '\/blog\/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams\/';
-
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-        </article>
-    
-
-
-
-            <section id="share-menu">
-    <section id="social-share-nav">
-        <ul class="links">
-            <header>
-                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
-            </header>
-            
-
-
-<li><a href="//twitter.com/share?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&text=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams&via=gre__sch" target="_blank" class="share-btn twitter">
-    <i class="fa fa-twitter"></i>
-    <p>Twitter</p>
-</a></li>
-
-
-<li><a href="//plus.google.com/share?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn google-plus">
-    <i class="fa fa-google-plus"></i>
-    <p>Google+</p>
-</a></li>
-
-
-<li><a href="//www.facebook.com/sharer/sharer.php?u=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn facebook">
-    <i class="fa fa-facebook"></i>
-    <p>Facebook</p>
-</a></li>
-
-
-<li><a href="//reddit.com/submit?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn reddit">
-    <i class="fa fa-reddit-alien"></i>
-    <p>Reddit</p>
-</a></li>
-
-
-<li><a href="//www.linkedin.com/shareArticle?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn linkedin">
-    <i class="fa fa-linkedin"></i>
-    <p>LinkedIn</p>
-</a></li>
-
-
-<li><a href="//www.stumbleupon.com/submit?url=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f&title=Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams" target="_blank" class="share-btn stumbleupon">
-    <i class="fa fa-stumbleupon"></i>
-    <p>StumbleUpon</p>
-</a></li>
-
-
-<li><a href="mailto:?subject=Check out this post by gresch&body=%2fblog%2f2016-09-22%2520Data%2520Science%2520-%2520R%2520Script%2520to%2520Analyze%2520BPMN%2520Diagrams%2f" target="_blank" class="share-btn email">
-    <i class="fa fa-envelope"></i>
-    <p>Email</p>
-</a></li>
-
-        </ul>
-    </section>
-</section>
-
-        
     </div>
     
 <section id="sidebar">
@@ -480,7 +334,7 @@
             
             <ul class="icons">
                 
-                    <li><a href="/index.xml" type="application/rss+xml"
+                    <li><a href="/categories/bpmn/index.xml" type="application/rss+xml"
                         target="_blank" title="RSS" class="fa fa-rss"></a></li>
                 
                 
@@ -631,7 +485,7 @@
         <section id="footer">
             <ul class="icons">
                 
-                    <li><a href="/index.xml" type="application/rss+xml"
+                    <li><a href="/categories/bpmn/index.xml" type="application/rss+xml"
                         target="_blank" title="RSS" class="fa fa-rss"></a></li>
                 
                 
