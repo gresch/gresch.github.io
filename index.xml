@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>gresch</title>
-    <link>/index.xml</link>
+    <link>https://gresch.github.io/index.xml</link>
     <description>Recent content on gresch</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 22 Sep 2016 08:42:35 +0200</lastBuildDate>
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gresch.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Data Science - R Script to Analyze BPMN Diagrams</title>
-      <link>/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</link>
+      <link>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</link>
       <pubDate>Thu, 22 Sep 2016 08:42:35 +0200</pubDate>
       
-      <guid>/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</guid>
+      <guid>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</guid>
       <description>
 
 &lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
@@ -42,21 +42,21 @@
 
 &lt;h1 id=&#34;process-example&#34;&gt;Process example&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/2016/09/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;result&#34;&gt;Result&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/img/2016/09/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
-&lt;img src=&#34;/img/2016/09/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
+&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>about</title>
-      <link>/about/</link>
+      <link>https://gresch.github.io/about/</link>
       <pubDate>Wed, 21 Sep 2016 14:12:59 +0200</pubDate>
       
-      <guid>/about/</guid>
+      <guid>https://gresch.github.io/about/</guid>
       <description>&lt;p&gt;Hello. I am a strategy consultant.&lt;/p&gt;
 
 &lt;p&gt;At the same time I am intrigued by Datascience and data visualization in two ways. First I find it incredible interesting what can be learned from data analysis. Second, I realized I enjoy thinking about data, algorithms and to understand the art of visualizing the meaning hidden in data.&lt;/p&gt;
