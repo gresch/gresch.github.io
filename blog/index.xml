@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blogs on gresch</title>
-    <link>https://gresch.github.io/blog/</link>
-    <description>Recent content in Blogs on gresch</description>
+    <title>Blog-rsses on gresch</title>
+    <link>/blog/index.xml</link>
+    <description>Recent content in Blog-rsses on gresch</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 22 Sep 2016 08:42:35 +0200</lastBuildDate>
-    <atom:link href="https://gresch.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Data Science - R Script to Analyze BPMN Diagrams</title>
-      <link>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</link>
+      <link>/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</link>
       <pubDate>Thu, 22 Sep 2016 08:42:35 +0200</pubDate>
       
-      <guid>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</guid>
+      <guid>/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</guid>
       <description>
 
 &lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
@@ -42,11 +42,12 @@
 
 &lt;h1 id=&#34;process-example&#34;&gt;Process example&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNDiagram.jpg&#34; alt=&#34;ExampleProcess&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/2016/09/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;result&#34;&gt;Result&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNXLS.jpg&#34; alt=&#34;ExampleProcess&#34; /&gt; &lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNPivot.jpg&#34; alt=&#34;ExampleProcess&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/2016/09/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
+&lt;img src=&#34;/img/2016/09/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     

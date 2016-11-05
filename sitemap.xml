@@ -2,17 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://gresch.github.io/</loc>
+    <loc>/</loc>
     <lastmod>2016-09-22T08:42:35+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</loc>
+    <loc>/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</loc>
     <lastmod>2016-09-22T08:42:35+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/about/</loc>
+    <loc>/about/</loc>
     <lastmod>2016-09-21T14:12:59+02:00</lastmod>
   </url>
   
