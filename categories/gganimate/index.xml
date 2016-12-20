@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blog-rsses on gresch</title>
-    <link>https://gresch.github.io/blog/index.xml</link>
-    <description>Recent content in Blog-rsses on gresch</description>
+    <title>gresch</title>
+    <link>https://gresch.github.io/categories/gganimate/index.xml</link>
+    <description>Recent content on gresch</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 22 Nov 2016 08:42:35 +0200</lastBuildDate>
-    <atom:link href="https://gresch.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://gresch.github.io/categories/gganimate/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>gganimate - Package functionality examples using Gapminder data</title>
@@ -164,48 +163,6 @@ library(dplyr)           # package for data transformation
 &lt;/ol&gt;
 
 &lt;p&gt;In terms of data visualization I believe &lt;strong&gt;gganimate&lt;/strong&gt; is helpful. The &lt;em&gt;frame&lt;/em&gt; provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its  &lt;em&gt;development&lt;/em&gt; over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might &lt;em&gt;engange&lt;/em&gt; much more with the plot.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Data Science - R Script to Analyze BPMN Diagrams</title>
-      <link>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</link>
-      <pubDate>Thu, 22 Sep 2016 08:42:35 +0200</pubDate>
-      
-      <guid>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</guid>
-      <description>
-
-&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;
-
-&lt;p&gt;yEd is a modeling tool to model different types of graphs, including BPMN diagrams. Contrary to database-oriented modeling tools, yEd is a file-oriented tool. It saves the diagram in an XML file (GraphML). In case one models diagrams with more than 100 elements, consistency checks and spell checks can become cumbersome and time consuming.&lt;/p&gt;
-
-&lt;p&gt;I prepared an R script that tries to reduce the effort by fetching the names and types of the modeled BPMN elements and make them available as a spreadsheet file. This spreadsheet may support you in the following activities:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Spellcheck&lt;/li&gt;
-&lt;li&gt;Check of consistent naming of process activities, business objects, and events&lt;/li&gt;
-&lt;li&gt;Process complexity estimation, e.g., based on the number of activities or used gateways&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you are interested to learn more about the R script, do not hesitate to contact me.&lt;/p&gt;
-
-&lt;h1 id=&#34;used-tools&#34;&gt;Used tools&lt;/h1&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.yworks.com/en/products_yed_download.html&#34;&gt;yEd - Graph Editor&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://www.rstudio.com/&#34;&gt;RStudio&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://products.office.com/en-us/excel&#34;&gt;MS Excel&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/gresch/GraphMLBPMNtoSpreadsheet&#34;&gt;Link to the R script&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&#34;process-example&#34;&gt;Process example&lt;/h1&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
-
-&lt;h1 id=&#34;result&#34;&gt;Result&lt;/h1&gt;
-
-&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
-&lt;img src=&#34;https://gresch.github.io/img/2016/09/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     

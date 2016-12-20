@@ -6,8 +6,166 @@
     <description>Recent content on gresch</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 22 Sep 2016 08:42:35 +0200</lastBuildDate>
+    <lastBuildDate>Tue, 22 Nov 2016 08:42:35 +0200</lastBuildDate>
     <atom:link href="https://gresch.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>gganimate - Package functionality examples using Gapminder data</title>
+      <link>https://gresch.github.io/blog/2016-11-22%20gganimate%20-%20Packages%20functionality%20examples%20using%20Gapminder%20data/</link>
+      <pubDate>Tue, 22 Nov 2016 08:42:35 +0200</pubDate>
+      
+      <guid>https://gresch.github.io/blog/2016-11-22%20gganimate%20-%20Packages%20functionality%20examples%20using%20Gapminder%20data/</guid>
+      <description>
+
+&lt;p&gt;I recently found an interesting R package that animates &lt;strong&gt;ggplot2&lt;/strong&gt; plots, namely &lt;a href=&#34;https://github.com/dgrtwo/gganimate&#34;&gt;gganimate&lt;/a&gt;. I created an &lt;a href=&#34;http://rmarkdown.rstudio.com/r_notebooks.html&#34;&gt;R notebook&lt;/a&gt; to present some functionalities of it, solely for learning purposes. As a test data set I use &lt;a href=&#34;https://www.gapminder.org/data/&#34;&gt;gapminder&lt;/a&gt; like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Data analysis, i.e., does it help to generate insights more efficiently?&lt;/li&gt;
+&lt;li&gt;Data visualization, i.e., does it help to better communicate findings?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This blog is organized as follows: &lt;strong&gt;Setup&lt;/strong&gt;, first I show necessary software and settings as well as give an data overview. In &lt;strong&gt;Non-animated plots&lt;/strong&gt; I show some plots that I would create in order to assess the data without any animation for a later comparison. In section &lt;strong&gt;Animated plots&lt;/strong&gt; I try &lt;strong&gt;gganimate&lt;/strong&gt; to create animated plots. I conclude in the last section &lt;strong&gt;Conclusion&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Please find the resulting R notebook on &lt;a href=&#34;https://github.com/gresch/r_playground/tree/master/gganimate&#34;&gt;github&lt;/a&gt;. The resulting HTML can be accessed via &lt;a href=&#34;https://rawgit.com/gresch/r_playground/master/gganimate/201611_gganimate_Packages%20functionality%20examples%20using%20Gapminder%20data.nb.html&#34;&gt;rawgit&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;setup&#34;&gt;Setup&lt;/h1&gt;
+
+&lt;h3 id=&#34;software&#34;&gt;Software&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Install R&lt;/li&gt;
+&lt;li&gt;Install RStudio&lt;/li&gt;
+&lt;li&gt;Install &lt;a href=&#34;https://www.imagemagick.org/script/binary-releases.php&#34;&gt;ImageMagick&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Install &lt;em&gt;gganimate&lt;/em&gt; via &lt;code&gt;devtools::install_github(&amp;quot;dgrtwo/gganimate&amp;quot;)&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;libraries&#34;&gt;Libraries&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r, message=FALSE, warning=FALSE&#34;&gt;library(gganimate)       # animation package
+library(ggplot2)         # plotting package
+library(gapminder)       # package with data to visualize
+library(dplyr)           # package for data transformation
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;settings&#34;&gt;Settings&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;theme_set(theme_bw())    # set theme to black and white
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;data-overview&#34;&gt;Data overview&lt;/h3&gt;
+
+&lt;p&gt;The data is an &lt;em&gt;excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.&lt;/em&gt; It includes 1704 observations with six variables:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;country&lt;/li&gt;
+&lt;li&gt;continent&lt;/li&gt;
+&lt;li&gt;year&lt;/li&gt;
+&lt;li&gt;lifeExp&lt;/li&gt;
+&lt;li&gt;pop&lt;/li&gt;
+&lt;li&gt;gdpPerCap&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;non-animated-plots&#34;&gt;Non-animated plots&lt;/h1&gt;
+
+&lt;p&gt;Before testing &lt;strong&gt;gganimate&lt;/strong&gt; I will create some plots via &lt;strong&gt;ggplot&lt;/strong&gt;. For this analysis I will concentrate on the relationship between &lt;em&gt;GDP per capita&lt;/em&gt; and &lt;em&gt;life expectancy at birth&lt;/em&gt;. To increase readability, I log10ed the x-axis and used &lt;em&gt;color&lt;/em&gt; to differentiate between observations coming from different &lt;em&gt;continents&lt;/em&gt;. It shows a somewhat positive relationship between these two variables.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r, fig.width=10&#34;&gt;ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) +
+  scale_x_log10()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/GDP.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;What are &lt;em&gt;possible&lt;/em&gt; ways to look at the &lt;em&gt;development&lt;/em&gt; of these variables over time (e.g., years)? Here are some means:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Scatter plot: use of &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Area: Show averages and use &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;scatterplot-use-of-facet-grid-year&#34;&gt;Scatterplot: use of &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;It overall shows a positive development of &lt;em&gt;life expectancy&lt;/em&gt; and &lt;em&gt;GDP per capita&lt;/em&gt; over the years, with Europe leading and Africa tailing.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r, fig.width=10&#34;&gt;ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) +
+  scale_x_log10() +
+  facet_grid(~year)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/GDP_years.jpg&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;area-show-averages-and-use-facet-grid-year&#34;&gt;Area: Show averages and use &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;This plot also shows a positive development of &lt;em&gt;life expectancy&lt;/em&gt; and &lt;em&gt;GDP per capita&lt;/em&gt; over the years, without showing differentiation for &lt;em&gt;continents&lt;/em&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;gapminder %&amp;gt;%
+  group_by(continent, year) %&amp;gt;%
+  summarise(meanLifeExp = round(mean(lifeExp), 0),
+            meanGdpPercap = round(mean(gdpPercap), 0)) %&amp;gt;%
+  ggplot() +
+  geom_area(aes(meanGdpPercap, meanLifeExp), stat = &amp;quot;identity&amp;quot;) +
+  scale_x_log10() +
+  facet_grid(~year)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/GDP_avg.png&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;animated-plots&#34;&gt;Animated plots&lt;/h1&gt;
+
+&lt;p&gt;The package &lt;strong&gt;gganimate&lt;/strong&gt; gives me another possibility: to have initial plot for every year provided and to display them in a series. In this case the variable &lt;em&gt;year&lt;/em&gt; needs to be set as the &lt;em&gt;frame&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;animated-scatterplot&#34;&gt;Animated scatterplot&lt;/h3&gt;
+
+&lt;p&gt;The animated scatter plot shows me the initial plot (i.e., two variables on the axes and the one variable as color fill). In addition, each frame shows a specific year. Frames change every second. Hence, it is possible to view developments over time.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r error=FALSE, warning=FALSE, echo=TRUE, message=FALSE, prompt=TRUE&#34;&gt;gg_animate(ggplot(gapminder) +
+            geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) +
+            scale_x_log10())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/animated_1.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;A &lt;code&gt;facet_grid(~continent)&lt;/code&gt; further allows now a differentiation on the individual continent developments.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r error=FALSE, warning=FALSE, echo=TRUE, message=FALSE, prompt=TRUE&#34;&gt;gg_animate(ggplot(gapminder) +
+            geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) +
+            scale_x_log10() +
+             facet_grid(~continent))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/animated_2.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;line-chart&#34;&gt;Line chart&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-r error=FALSE, echo=TRUE, message=FALSE, warning=FALSE, prompt=TRUE&#34;&gt;gg_animate(gapminder %&amp;gt;%
+  group_by(continent, year) %&amp;gt;%
+  summarise(meanLifeExp = round(mean(lifeExp), 0),
+            meanGdpPercap = round(mean(gdpPercap), 0)) %&amp;gt;%
+  ggplot() +
+  geom_line(aes(meanGdpPercap, meanLifeExp, frame = year), stat = &amp;quot;identity&amp;quot;) +
+  scale_x_log10())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&#34;https://gresch.github.io/img/2016/11/animated_3.gif&#34; alt=&#34;&#34; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;conclusion&#34;&gt;Conclusion&lt;/h1&gt;
+
+&lt;p&gt;&lt;strong&gt;gganimate&lt;/strong&gt; is an interesting package with some advantages. I will try to use it more often from now on. One open question would be whether it is possible to change &lt;em&gt;width&lt;/em&gt; and &lt;em&gt;height&lt;/em&gt; of the animated plots.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Data analysis, i.e., does it help to generate insights more efficiently?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In terms of data analysis it brings only few benefits. Other plots and means of exploration are available to understand the data, such as histograms, table view, or facet grids.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Data visualiazation, i.e., does it help to better communicate findings?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In terms of data visualization I believe &lt;strong&gt;gganimate&lt;/strong&gt; is helpful. The &lt;em&gt;frame&lt;/em&gt; provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its  &lt;em&gt;development&lt;/em&gt; over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might &lt;em&gt;engange&lt;/em&gt; much more with the plot.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Data Science - R Script to Analyze BPMN Diagrams</title>
