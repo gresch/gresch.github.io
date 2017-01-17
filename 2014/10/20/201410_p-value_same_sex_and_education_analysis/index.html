@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Exploring years of education and strong opinions on same sex relationships using P-value-analysis &middot; gresch</title>
+        <meta name="description" content="Main objective: Exploring years of education and strong opinions on same sex relationships; My goal: learn more about p value analysis">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="robots" content="index,follow">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:title" content="Exploring years of education and strong opinions on same sex relationships using P-value-analysis">
+<meta property="og:description" content="Main objective: Exploring years of education and strong opinions on same sex relationships; My goal: learn more about p value analysis">
+<meta property="og:type" content="article">
+<meta property="og:url" content="/2014/10/20/201410_p-value_same_sex_and_education_analysis/">
+        <link rel="stylesheet" href="../../../../dist/styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin,cyrillic-ext,latin-ext,cyrillic">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+
+
+
+
+    </head>
+    <body>
+        
+        
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        
+        
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    
+
+        <div id="wrapper">
+            <header class="site-header">
+                <div class="container">
+                    <div class="site-title-wrapper">
+                        
+                            <h1 class="site-title">
+                                <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                            </h1>
+                        
+                        <a class="button-square" href="../../../../index.xml"><i class="fa fa-rss"></i></a>
+                        
+                            <a class="button-square button-social hint--top" data-hint="Twitter" title="Twitter" href="https://twitter.com/gre__sch">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        
+                        
+                        
+                            <a class="button-square button-social hint--top" data-hint="Github" title="Github" href="https://github.com/gresch">
+                                <i class="fa fa-github-alt"></i>
+                            </a>
+                        
+                        
+                        
+                        
+                        
+                    </div>
+
+                    <ul class="site-nav">
+                        
+    <li class="site-nav-item">
+        <a title="Blog" href="../../../../">Blog</a>
+    </li>
+
+    <li class="site-nav-item">
+        <a title="About" href="../../../../page/about/">About</a>
+    </li>
+
+                    </ul>
+                </div>
+            </header>
+
+            <div id="container">
+
+
+<div class="container">
+    <article class="post-container" itemscope="" itemtype="http://schema.org/BlogPosting">
+        <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Exploring years of education and strong opinions on same sex relationships using P-value-analysis</h1>
+    
+        <p class="post-description" itemprop="description">Main objective: Exploring years of education and strong opinions on same sex relationships; My goal: learn more about p value analysis</p>
+    
+    <p class="post-date">
+        <span>Published <time datetime="2014-10-20" itemprop="datePublished">Mon, Oct 20, 2014</time></span>
+        <span>by</span>
+        <span itemscope="" itemprop="author" itemtype="https://schema.org/Person">
+            <span itemprop="name">
+                <a href="https://twitter.com/gre__sch" itemprop="url" rel="author">gresch</a>
+            </span>
+        </span>
+    </p>
+</header>
+
+        <div class="post-content clearfix" itemprop="articleBody">
+    
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>This document summarizes my project I did for the Coursera <a href="https://www.coursera.org/specializations/statistics">Master Statistics with R</a> class. I decided to explore the following question: “<strong>Is there a relationship between strong opinions on same sex relationships and years of education?</strong>”.</p>
+<p>The world changes. And as it changes people and states become more liberal – even when it comes to topics of same sex relationships. A strong belief that same sex relationships are wrong may root in religion or family values. However, as the Economist explains (<a href="http://www.economist.com/node/17227800?story_id=17227800" class="uri">http://www.economist.com/node/17227800?story_id=17227800</a>), in 1995 fewer than half of Americans (48%) are opposed to gay marriage, while 42% are in favour. Today same sex marriage is legal in more than 30 states in the U.S. (<a href="http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx" class="uri">http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx</a>). In regard of this development I find it worthwhile to understand not only the legal adoption of same-sex relationships, but also how the public adopts to the liberation of same sex relationships. While there exist data analyses on opinion on same sex relationships with respect to religion (<a href="http://www.economist.com/node/17227800?story_id=17227800" class="uri">http://www.economist.com/node/17227800?story_id=17227800</a>) no analysis with respect to years of education exists to the best of my knowledge.</p>
+<p>In the remainder of this chapter I introduce the data set and necessary variables which will be analyzed in order to find an answer to the aforementioned question. Further, I will detail necessary data manipulation steps. In chapter two you find some explorative data analyses and sample statistics to understand data spread and variability. In chapter three I elaborate on analyses that explore a possible relationship between <strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong> and <strong>VIEW ON HOMOSEXUAL RELATIONS</strong>. I conclude my project in chapter four.</p>
+<p>If you want to follow up on this project or simply look at the code, please feel free to use the <code>code</code> button on the top-right corner of this document.</p>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<pre class="r"><code># load libraries
+library(&quot;ggplot2&quot;)
+library(&quot;ggthemes&quot;)
+library(&quot;RColorBrewer&quot;)
+library(&quot;grid&quot;)
+
+# load inference code
+source(&quot;http://bit.ly/dasi_inference&quot;)
+
+# load gss data
+load(url(&quot;http://bit.ly/dasi_gss_data&quot;))</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p>For my analysis I rely on the data set <em>General Social Survey (GSS)</em> (source: <a href="http://d396qusza40orc.cloudfront.net/statistics/project/gss.Rdata" class="uri">http://d396qusza40orc.cloudfront.net/statistics/project/gss.Rdata</a>). The GSS is a sociological survey used to collect data on demographic characteristics and attitudes of residents of the United States.</p>
+<p>The survey is conducted face-to-face with an in-person interview by the National Opinion Research Center at the University of Chicago, of adults (18+) in randomly selected households. The survey was conducted every year from 1972 to 1994 (except in 1979, 1981, and 1992). Since 1994, it has been conducted every other year. (source: <a href="http://en.wikipedia.org/wiki/General_Social_Survey" class="uri">http://en.wikipedia.org/wiki/General_Social_Survey</a>)</p>
+<p>It is an observational study (survey), where respondents are observed and not exposed to a treatment. The respondents are selected randomly. Scope of inference: This data cannot be used for establishing causal links, since there is no random assignment. Scope of interest: The population of interest are residents of the USA. Generalizability is possible, since the respondents were selected randomly. One possible source of bias could be that randomly selected respondents choose not to respond (non-response) so that the sample is not generalizable anymore. The data set contains 57,061 cases (observations). Each case describes a respondent’s interview result, including 114 statements (variables).</p>
+<p>The two variables of interest are <strong>VIEW ON HOMOSEXUAL RELATIONS</strong> (categorical) and <strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong> (numerical).</p>
+</div>
+<div id="data-cleansing" class="section level2">
+<h2>Data cleansing</h2>
+<p>In order to work with the data, I remove all observations that state a NA for the variable <strong>VIEW ON HOMOSEXUAL RELATIONS</strong>. My assumption is that the distribution of the variable is the same as for the people who have not preferred to answer (24,272 observations). I removed observations with missing values for <strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong> in the same manner (75 observations).</p>
+<pre class="r"><code># delete all NAs for homosex var
+gssNA &lt;- gss[rowSums(is.na(gss[95]))==0,]
+# delete all NAs for education var
+gssNA &lt;- gssNA[rowSums(is.na(gssNA[8]))==0,]</code></pre>
+<p>Since I am only interested in the <em>strong opinions</em> on homosexual relations I concentrate on respondents who voted either <em>Always Wrong</em> or <em>Not Wrong At All</em> and I ignore respondents with a not strong opinion, e.g., <em>Sometimes Wrong</em>, <em>Almst Always Wrg</em> or <em>Other</em>.</p>
+<pre class="r"><code># Select only the responses of interest
+gssNA$strongviewshomosex &lt;- as.character(gssNA$homosex)
+gssNA &lt;- gssNA[gssNA$strongviewshomosex != &quot;Sometimes Wrong&quot;,]
+gssNA &lt;- gssNA[gssNA$strongviewshomosex != &quot;Almst Always Wrg&quot;,]
+gssNA &lt;- gssNA[gssNA$strongviewshomosex != &quot;Other&quot;,]
+gssNA$strongviewshomosex &lt;- as.factor(gssNA$strongviewshomosex)</code></pre>
+</div>
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1>Exploratory data analysis</h1>
+<p>Before we look into a possible relationship between the two variables I explore each of the variables independently. Since one variable is numerical (<strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong>) and one is categorical (<strong>OPINION ON HOMOSEXUAL RELATIONS</strong>) I use different approaches.</p>
+<div id="highest-year-of-school-completed" class="section level2">
+<h2>HIGHEST YEAR OF SCHOOL COMPLETED</h2>
+<p>This section explores the numerical variable <strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong> (<em>gssNA$educ</em>). The summary for the variable shows a mean of 12.6 years and a median of 12 years. The histogram shows a multimodal distribution. The different degrees very likely explain the peaks (multimodality) in the histogram. The second figure shows histograms differentiated by the variable <strong>DEGREE</strong>. We also know from the summary of the variable that 25% of all respondents – which answered the same sex relationship question – have less or equal than 11 years of education; and 75% have less or equal than 14 years of education. The maximum lies by 20 years of education.</p>
+<p>12 years of education falls into the US high school degree, and hence, I argue that this degree is the most common for US residents. The maximum is 20 years of education, reserved for graduate students.</p>
+<pre class="r"><code>summary(gssNA$educ)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00   11.00   12.00   12.56   14.00   20.00</code></pre>
+<pre class="r"><code>sd(gssNA$educ)</code></pre>
+<pre><code>## [1] 3.178399</code></pre>
+<p>The histogram shows a multimodal distribution that is clearly centered at 12 years of education. The multimodality is explained by the respondents different degrees (another GSS variable).</p>
+<pre class="r"><code># Create histogram
+educhist &lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) + labs(title = &quot;Histogram of HIGHEST YEAR OF SCHOOL COMPLETED&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;) 
+# Create degree histogram
+educdegreehist &lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) + facet_wrap(~degree) + labs(title = &quot;Histogram of HIGHEST YEAR OF SCHOOL COMPLETED, separated by degree&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;)
+# Print both histograms
+multiplot(educhist, educdegreehist, cols=2)</code></pre>
+<p><img src="figures/unnamed-chunk-6-1.png" width="960" /></p>
+</div>
+<div id="strong-opinion-on-homosexual-relations" class="section level2">
+<h2>Strong OPINION ON HOMOSEXUAL RELATIONS</h2>
+<p>In this section I explore the categorical variable <strong>OPINION ON HOMOSEXUAL RELATIONS</strong> with the remaining levels <em>Always Wrong</em> and <em>Not Wrong At All</em> that I refer to as strong opinions. The summary for the variable shows that the majority of the respondents answered that homosexual relations are <em>Always Wrong</em> with 21.542 cases and the minority sees it as <em>Not Wrong At All</em> with 7.271 cases. When we differentiate this by year we see a shift in the distribution of the answers. In 1973 the majority answered with <em>Always Wrong</em>. This changes over time. In 2010 and 2012 the respondents almost equally answered with either <em>Always Wrong</em> or <em>Not Wrong At All</em>.</p>
+<pre class="r"><code>#by(gssNA$strongviewshomosex, gssNA$year, summary)
+summary(gssNA$strongviewshomosex)</code></pre>
+<pre><code>##     Always Wrong Not Wrong At All 
+##            21542             7271</code></pre>
+<pre class="r"><code>sd(gssNA$strongviewshomosex)</code></pre>
+<pre><code>## [1] 0.4343693</code></pre>
+<pre class="r"><code># Create overall barplot
+barplotall &lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + labs(title = &quot;OPINION ON HOMOSEXUAL RELATIONS&quot;, y = &quot;Count&quot;, x = &quot;OPINION ON HOMOSEXUAL RELATIONS&quot;) + coord_flip()
+# Create barplot, separated by years
+barplotyears &lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + facet_wrap(~year) + labs(title = &quot;OPINION ON HOMOSEXUAL RELATIONS, differentiated by year&quot;, y = &quot;Count&quot;, x = &quot;OPINION ON HOMOSEXUAL RELATIONS&quot;) + coord_flip()
+# Print both histograms
+multiplot(barplotall, barplotyears, cols=2)</code></pre>
+<p><img src="figures/unnamed-chunk-7-1.png" width="960" /></p>
+</div>
+</div>
+<div id="inference" class="section level1">
+<h1>Inference</h1>
+<p>After discussing the two variables independently, I use this section to explore the possible relationship between the variables <strong>HIGHEST YEAR OF SCHOOL COMPLETED</strong> and <strong>OPINION ON HOMOSEXUAL RELATIONS</strong> (strong opinions).</p>
+<p>By comparing the means (and medians) for each level of <strong>OPINION ON HOMOSEXUAL RELATIONS</strong> I can see that respondents who view homosexual relationships as <em>Always Wrong</em> have on average 12.04 years of education, while respondents who view homosexual relationships as <em>Not Wrong At All</em> have on average 14.12 years of education. The means are also close to their respective medians that indicates not a too skewed distribution</p>
+<pre class="r"><code># Determine means and medians for each level
+by(gssNA$educ, gssNA$strongviewshomosex, summary)</code></pre>
+<pre><code>## gssNA$strongviewshomosex: Always Wrong
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00   11.00   12.00   12.04   14.00   20.00 
+## -------------------------------------------------------- 
+## gssNA$strongviewshomosex: Not Wrong At All
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00   12.00   14.00   14.12   16.00   20.00</code></pre>
+<pre class="r"><code># Create histogram for YEARS OF EDUCATION, separated by views on homosexual relations
+plothist &lt;- ggplot(gssNA, aes(x = educ, fill = strongviewshomosex)) + geom_histogram(aes(y=(..density..)), position=&#39;dodge&#39;, binwidth=1) + labs(title = &quot;HISTOGRAM&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;, y= &quot;PERCENT&quot;) + theme(legend.position=&quot;bottom&quot;)
+# Create boxplot for YEARS OF EDUCATION, separated by views on homosexual relations
+plotbox &lt;- ggplot(gssNA, aes(y = educ, x=strongviewshomosex)) + geom_boxplot() + labs(title=&quot;BOXPLOT&quot;, y = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;, x = &quot;STRONG OPINION ON HOMOSEXUAL RELATIONS&quot;)
+# Create bargraph for YEARS OF EDUCATION, separated by views on homosexual relations
+plotallyears &lt;- ggplot(gssNA, aes(x = educ, fill = strongviewshomosex)) + geom_bar(position=&quot;fill&quot;, binwidth = 1) + coord_flip() + labs(title=&quot;DISTRIBUTION FOR ALL YEARS&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;, y = &quot;PERCENT&quot;) + theme(legend.position=&quot;bottom&quot;)
+# Create bargraph for YEARS OF EDUCATION, separated by views on homosexual relations and only for year 2012
+plot2012 &lt;- ggplot(gssNA[gssNA$year == 2012,], aes(x = educ, fill = strongviewshomosex)) + geom_bar(position=&quot;fill&quot;, binwidth = 1) + coord_flip() + labs(title=&quot;DISTRIBUTION FOR 2012&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;, y = &quot;PERCENT&quot;) + theme(legend.position=&quot;bottom&quot;)
+# Print plots
+multiplot(plothist, plotbox, cols=2)</code></pre>
+<p><img src="figures/unnamed-chunk-8-1.png" width="960" /></p>
+<pre class="r"><code>multiplot(plotallyears, plot2012, cols=2)</code></pre>
+<p><img src="figures/unnamed-chunk-8-2.png" width="960" /></p>
+<p>In the following I describe the necessary steps for inference. The project question I want to investigate is :“<em>Is there a relationship between strong opinions on same sex relationships and years of education?</em>”.</p>
+<div id="set-the-hypotheses" class="section level2">
+<h2>Set the hypotheses</h2>
+<p><strong>H0</strong>: On average, US citizen that find homosexual relationships <em>Not Wrong At All</em> have the same years of education than US citizen that find homosexual relationships <em>Always Wrong</em>.</p>
+<p><strong>HA</strong>: On average, US citizen that find homosexual relationships <em>Not Wrong At All</em> have more years of education than US citizen that find homosexual relationships <em>Always Wrong</em>.</p>
+</div>
+<div id="calculate-the-point-estimate-and-standard-error" class="section level2">
+<h2>Calculate the point estimate and standard error</h2>
+<p>Firstly, I calculate the standard error. To do this, I need the standard error for each level of categorical variable for the education variable. If the conditions are met, I draw the sampling distribution, shade the p-value, and calculate the test statistic. On the basis of the test statistic I make a decision and interpret it in context of the project question.</p>
+<pre class="r"><code>#Determine standard error
+by(gssNA$educ, gssNA$strongviewshomosex, sd)</code></pre>
+<pre><code>## gssNA$strongviewshomosex: Always Wrong
+## [1] 3.096514
+## -------------------------------------------------------- 
+## gssNA$strongviewshomosex: Not Wrong At All
+## [1] 2.895745</code></pre>
+<p>Calculating the standard error for comparing two means follows this formula:</p>
+<p><span class="math display">\[SE = \sqrt{\frac{s_{1}^{2}}{n_{1}}+\frac{s_{2}^{2}}{n_{2}}}\]</span> <span class="math display">\[SE = \sqrt{\frac{2.8957^{2}}{7271}+\frac{3.0965^{2}}{21542}} = SE = \sqrt{\frac{8.38507849}{7271}+\frac{9.58831225}{21542}}\]</span> <span class="math display">\[SE = \sqrt{0.00115322218264337780222802915692+0.00044509851685080308235075666140563}\]</span></p>
+<p><span class="math display">\[SE = 0.03997900323287438946824542558142\]</span></p>
+<p>Secondly, I calculate the point estimate (mean). To do so, I need to determine the mean for each level of categorical variable for the education variable.</p>
+<pre class="r"><code>#Determine mean
+by(gssNA$educ, gssNA$strongviewshomosex, mean)</code></pre>
+<pre><code>## gssNA$strongviewshomosex: Always Wrong
+## [1] 12.03811
+## -------------------------------------------------------- 
+## gssNA$strongviewshomosex: Not Wrong At All
+## [1] 14.11993</code></pre>
+<p><span class="math display">\[Z = \frac{point estimate - null value}{SE}\]</span> <span class="math display">\[Z = \frac{14.1199-12.0381}{0.03997900323287438946824542558142} = 52.072\]</span> I use a significance level of 0.05.</p>
+</div>
+<div id="check-conditions" class="section level2">
+<h2>Check conditions</h2>
+<p>After determining the standard error and the point estimate, I check the conditions in order to apply the inference method.</p>
+<ul>
+<li>Independence within groups: The GSS survey is conducted face-to-face with an in-person interview by the National Opinion Research Center at the University of Chicago, of adults (18+) in randomly selected households. Hence, this condition is met.</li>
+<li>Independence between groups: The observations are not paired data and hence independent. This condition is met.</li>
+<li>Sample size/ skew: Each sample size is larger than 30 observations. <span class="math display">\[n_{Always Wrong} = 21542\]</span> and <span class="math display">\[n_{Not Wrong At All} = 7271\]</span>. This condition is met.</li>
+</ul>
+</div>
+<div id="draw-sampling-distribution-shade-p-value-calculate-test-statistic" class="section level2">
+<h2>Draw sampling distribution, shade p-value, calculate test statistic</h2>
+<pre class="r"><code>inference(gssNA$educ, gssNA$strongviewshomosex, est=&quot;mean&quot;, type=&quot;ht&quot;, method=&quot;theoretical&quot;, alternative=&quot;greater&quot;, null=0, order=c(&quot;Not Wrong At All&quot;, &quot;Always Wrong&quot;))</code></pre>
+<pre><code>## Response variable: numerical, Explanatory variable: categorical
+## Difference between two means
+## Summary statistics:
+## n_Not Wrong At All = 7271, mean_Not Wrong At All = 14.1199, sd_Not Wrong At All = 2.8957
+## n_Always Wrong = 21542, mean_Always Wrong = 12.0381, sd_Always Wrong = 3.0965</code></pre>
+<pre><code>## Observed difference between means (Not Wrong At All-Always Wrong) = 2.0818
+## H0: mu_Not Wrong At All - mu_Always Wrong = 0 
+## HA: mu_Not Wrong At All - mu_Always Wrong &gt; 0 
+## Standard error = 0.04 
+## Test statistic: Z =  52.072 
+## p-value =  0</code></pre>
+<p><img src="figures/unnamed-chunk-11-1.png" width="960" /></p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The test statistic is larger than 52, and hence is over 52 standard deviations away from the mean. From this I can conclude that the p-value must be very small if not 0. As the inference function calculates the p-value as 0, which is smaller than the set significance level (0.05), I reject the null hypothesis in favor of the alternative hypothesis.</p>
+<p>The data and the inference show that there is convincing evidence that indeed on average, US citizen that find homosexual relationships <em>Not Wrong At All</em> have more years of education than US citizen that find homosexual relationships <em>Always Wrong</em>.</p>
+<p>In this project I investigated the following question: “<em>Is there a relationship between strong opinions on same sex relationships and years of education?</em>”. The data and the inference test confirmed a relationship between respondents’ strong views on same sex relationships and years of education. Respondents who view same sex relationships as <em>Not Wrong At All</em> have, on average, 14.12 years of education and respondents who view same sex relationships as <em>Always Wrong</em> have, on average, 12.04 years of education.</p>
+</div>
+
+
+
+</div>
+
+        <footer class="post-footer clearfix">
+    
+
+    <div class="share">
+        <a class="icon-twitter" href="https://twitter.com/share?text=Exploring%20years%20of%20education%20and%20strong%20opinions%20on%20same%20sex%20relationships%20using%20P-value-analysis&url=%2f2014%2f10%2f20%2f201410_p-value_same_sex_and_education_analysis%2f"
+            onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+            <i class="fa fa-twitter"></i>
+            <span class="hidden">Twitter</span>
+        </a>
+
+        <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=%2f2014%2f10%2f20%2f201410_p-value_same_sex_and_education_analysis%2f"
+            onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+            <i class="fa fa-facebook"></i>
+            <span class="hidden">Facebook</span>
+        </a>
+
+        <a class="icon-google-plus" href="https://plus.google.com/share?url=%2f2014%2f10%2f20%2f201410_p-value_same_sex_and_education_analysis%2f"
+           onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+           <i class="fa fa-google-plus"></i>
+            <span class="hidden">Google+</span>
+        </a>
+    </div>
+</footer>
+
+        
+    </article>
+</div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="site-title-wrapper">
+                    <h1 class="site-title">
+                        <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                    </h1>
+                    <a class="button-square button-jump-top js-jump-top" href="#">
+                        <i class="fa fa-angle-up"></i>
+                    </a>
+                </div>
+
+                <p class="footer-copyright">
+                    <span>&copy; 2017 / Powered by <a href="https://gohugo.io/">Hugo</a></span>
+                </p>
+                <p class="footer-copyright">
+                    <span><a href="https://github.com/roryg/ghostwriter">Ghostwriter theme</a> By <a href="http://jollygoodthemes.com">JollyGoodThemes</a></span>
+                    <span>/ <a href="https://github.com/jbub/ghostwriter">Ported</a> to Hugo By <a href="https://github.com/jbub">jbub</a></span>
+                </p>
+            </div>
+        </footer>
+
+        <script src="../../../../js/jquery-1.11.3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <script src="../../../../js/jquery.fitvids.js"></script>
+        <script src="../../../../js/scripts.js"></script>
+    </body>
+</html>
+

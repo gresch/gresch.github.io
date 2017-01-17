@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>gganimate - Packages functionality examples using Gapminder data &middot; gresch</title>
+        <meta name="description" content="I recently found an interesting R package that animates ggplot2 plots, namely gganimate. This notebook shows some functionalities of it, solely for learning purposes. As a test data set I use gapminder like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_
+Data analysis, i.e., does it help to generate insights more efficiently?Data visualization, i.e., does it help to better communicate findings?">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="robots" content="index,follow">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:title" content="gganimate - Packages functionality examples using Gapminder data">
+<meta property="og:description" content="I recently found an interesting R package that animates ggplot2 plots, namely gganimate. This notebook shows some functionalities of it, solely for learning purposes. As a test data set I use gapminder like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_
+Data analysis, i.e., does it help to generate insights more efficiently?Data visualization, i.e., does it help to better communicate findings?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="/2016/11/22/201611_gganimate_packages_functionality_examples_using_gapminder_data/">
+        <link rel="stylesheet" href="../../../../dist/styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin,cyrillic-ext,latin-ext,cyrillic">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+
+
+
+
+    </head>
+    <body>
+        
+        
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        
+        
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    
+
+        <div id="wrapper">
+            <header class="site-header">
+                <div class="container">
+                    <div class="site-title-wrapper">
+                        
+                            <h1 class="site-title">
+                                <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                            </h1>
+                        
+                        <a class="button-square" href="../../../../index.xml"><i class="fa fa-rss"></i></a>
+                        
+                            <a class="button-square button-social hint--top" data-hint="Twitter" title="Twitter" href="https://twitter.com/gre__sch">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        
+                        
+                        
+                            <a class="button-square button-social hint--top" data-hint="Github" title="Github" href="https://github.com/gresch">
+                                <i class="fa fa-github-alt"></i>
+                            </a>
+                        
+                        
+                        
+                        
+                        
+                    </div>
+
+                    <ul class="site-nav">
+                        
+    <li class="site-nav-item">
+        <a title="Blog" href="../../../../">Blog</a>
+    </li>
+
+    <li class="site-nav-item">
+        <a title="About" href="../../../../page/about/">About</a>
+    </li>
+
+                    </ul>
+                </div>
+            </header>
+
+            <div id="container">
+
+
+<div class="container">
+    <article class="post-container" itemscope="" itemtype="http://schema.org/BlogPosting">
+        <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">gganimate - Packages functionality examples using Gapminder data</h1>
+    
+    <p class="post-date">
+        <span>Published <time datetime="2016-11-22" itemprop="datePublished">Tue, Nov 22, 2016</time></span>
+        <span>by</span>
+        <span itemscope="" itemprop="author" itemtype="https://schema.org/Person">
+            <span itemprop="name">
+                <a href="https://twitter.com/gre__sch" itemprop="url" rel="author">gresch</a>
+            </span>
+        </span>
+    </p>
+</header>
+
+        <div class="post-content clearfix" itemprop="articleBody">
+    
+
+
+
+<p>I recently found an interesting R package that animates <strong>ggplot2</strong> plots, namely <a href="https://github.com/dgrtwo/gganimate">gganimate</a>. This <a href="http://rmarkdown.rstudio.com/r_notebooks.html">notebook</a> shows some functionalities of it, solely for learning purposes. As a test data set I use <a href="https://www.gapminder.org/data/">gapminder</a> like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_</p>
+<ol style="list-style-type: decimal">
+<li>Data analysis, i.e., does it help to generate insights more efficiently?</li>
+<li>Data visualization, i.e., does it help to better communicate findings?</li>
+</ol>
+<p>This notebook is organized as follows: <strong>Setup</strong>, first I show necessary software and settings as well as give an data overview. In <strong>Non-animated plots</strong> I show some plots that I would create in order to assess the data without any animation for a later comparison. In section <strong>Animated plots</strong> I try <strong>gganimate</strong> to create animated plots. I conclude in the last section <strong>Conclusion</strong>.</p>
+<p>Contact: <a href="https://twitter.com/gre__sch">gresch</a></p>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<div id="software" class="section level3">
+<h3>Software</h3>
+<ol style="list-style-type: decimal">
+<li>Install R</li>
+<li>Install RStudio</li>
+<li>Install <a href="https://www.imagemagick.org/script/binary-releases.php">ImageMagick</a></li>
+<li>Install <em>gganimate</em> via <code>devtools::install_github(&quot;dgrtwo/gganimate&quot;)</code></li>
+</ol>
+</div>
+<div id="libraries" class="section level3">
+<h3>Libraries</h3>
+<pre class="r"><code>library(gganimate)       # animation package
+library(ggplot2)         # plotting package
+library(gapminder)       # package with data to visualize
+library(dplyr)           # package for data transformation</code></pre>
+</div>
+<div id="settings" class="section level3">
+<h3>Settings</h3>
+<pre class="r"><code>theme_set(theme_bw())    # set theme to black and white</code></pre>
+</div>
+<div id="data-overview" class="section level3">
+<h3>Data overview</h3>
+<p>The data is an <em>excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.</em> It includes 1704 observations with six variables:</p>
+<ul>
+<li>country</li>
+<li>continent</li>
+<li>year</li>
+<li>lifeExp</li>
+<li>pop</li>
+<li>gdpPerCap</li>
+</ul>
+<pre class="r"><code>knitr::kable(summary(gapminder))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="center">country</th>
+<th align="center">continent</th>
+<th align="center">year</th>
+<th align="center">lifeExp</th>
+<th align="center">pop</th>
+<th align="center">gdpPercap</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td align="center">Afghanistan: 12</td>
+<td align="center">Africa :624</td>
+<td align="center">Min. :1952</td>
+<td align="center">Min. :23.60</td>
+<td align="center">Min. :6.001e+04</td>
+<td align="center">Min. : 241.2</td>
+</tr>
+<tr class="even">
+<td></td>
+<td align="center">Albania : 12</td>
+<td align="center">Americas:300</td>
+<td align="center">1st Qu.:1966</td>
+<td align="center">1st Qu.:48.20</td>
+<td align="center">1st Qu.:2.794e+06</td>
+<td align="center">1st Qu.: 1202.1</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td align="center">Algeria : 12</td>
+<td align="center">Asia :396</td>
+<td align="center">Median :1980</td>
+<td align="center">Median :60.71</td>
+<td align="center">Median :7.024e+06</td>
+<td align="center">Median : 3531.8</td>
+</tr>
+<tr class="even">
+<td></td>
+<td align="center">Angola : 12</td>
+<td align="center">Europe :360</td>
+<td align="center">Mean :1980</td>
+<td align="center">Mean :59.47</td>
+<td align="center">Mean :2.960e+07</td>
+<td align="center">Mean : 7215.3</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td align="center">Argentina : 12</td>
+<td align="center">Oceania : 24</td>
+<td align="center">3rd Qu.:1993</td>
+<td align="center">3rd Qu.:70.85</td>
+<td align="center">3rd Qu.:1.959e+07</td>
+<td align="center">3rd Qu.: 9325.5</td>
+</tr>
+<tr class="even">
+<td></td>
+<td align="center">Australia : 12</td>
+<td align="center">NA</td>
+<td align="center">Max. :2007</td>
+<td align="center">Max. :82.60</td>
+<td align="center">Max. :1.319e+09</td>
+<td align="center">Max. :113523.1</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td align="center">(Other) :1632</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+<td align="center">NA</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>knitr::kable(head(gapminder, 15))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">country</th>
+<th align="left">continent</th>
+<th align="right">year</th>
+<th align="right">lifeExp</th>
+<th align="right">pop</th>
+<th align="right">gdpPercap</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1952</td>
+<td align="right">28.801</td>
+<td align="right">8425333</td>
+<td align="right">779.4453</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1957</td>
+<td align="right">30.332</td>
+<td align="right">9240934</td>
+<td align="right">820.8530</td>
+</tr>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1962</td>
+<td align="right">31.997</td>
+<td align="right">10267083</td>
+<td align="right">853.1007</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1967</td>
+<td align="right">34.020</td>
+<td align="right">11537966</td>
+<td align="right">836.1971</td>
+</tr>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1972</td>
+<td align="right">36.088</td>
+<td align="right">13079460</td>
+<td align="right">739.9811</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1977</td>
+<td align="right">38.438</td>
+<td align="right">14880372</td>
+<td align="right">786.1134</td>
+</tr>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1982</td>
+<td align="right">39.854</td>
+<td align="right">12881816</td>
+<td align="right">978.0114</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1987</td>
+<td align="right">40.822</td>
+<td align="right">13867957</td>
+<td align="right">852.3959</td>
+</tr>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1992</td>
+<td align="right">41.674</td>
+<td align="right">16317921</td>
+<td align="right">649.3414</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">1997</td>
+<td align="right">41.763</td>
+<td align="right">22227415</td>
+<td align="right">635.3414</td>
+</tr>
+<tr class="odd">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">2002</td>
+<td align="right">42.129</td>
+<td align="right">25268405</td>
+<td align="right">726.7341</td>
+</tr>
+<tr class="even">
+<td align="left">Afghanistan</td>
+<td align="left">Asia</td>
+<td align="right">2007</td>
+<td align="right">43.828</td>
+<td align="right">31889923</td>
+<td align="right">974.5803</td>
+</tr>
+<tr class="odd">
+<td align="left">Albania</td>
+<td align="left">Europe</td>
+<td align="right">1952</td>
+<td align="right">55.230</td>
+<td align="right">1282697</td>
+<td align="right">1601.0561</td>
+</tr>
+<tr class="even">
+<td align="left">Albania</td>
+<td align="left">Europe</td>
+<td align="right">1957</td>
+<td align="right">59.280</td>
+<td align="right">1476505</td>
+<td align="right">1942.2842</td>
+</tr>
+<tr class="odd">
+<td align="left">Albania</td>
+<td align="left">Europe</td>
+<td align="right">1962</td>
+<td align="right">64.820</td>
+<td align="right">1728137</td>
+<td align="right">2312.8890</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="non-animated-plots" class="section level1">
+<h1>Non-animated plots</h1>
+<p>Before testing <strong>gganimate</strong> I will create some plots via <strong>ggplot</strong>. For this analysis I will concentrate on the relationship between <em>GDP per capita</em> and <em>life expectancy at birth</em>. To increase readability, I log10ed the x-axis and used <em>color</em> to differentiate between observations coming from different <em>continents</em>. It shows a somewhat positive relationship between these two variables.</p>
+<pre class="r"><code>ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
+  scale_x_log10()</code></pre>
+<p><img src="figures/unnamed-chunk-5-1.png" width="960" /></p>
+<p>What are <em>possible</em> ways to look at the <em>development</em> of these variables over time (e.g., years)? Here are some means:</p>
+<ol style="list-style-type: decimal">
+<li>Scatter plot: use of <code>facet_grid(~year)</code></li>
+<li>Area: Show averages and use <code>facet_grid(~year)</code></li>
+</ol>
+<div id="scatterplot-use-of-facet_gridyear" class="section level3">
+<h3>Scatterplot: use of <code>facet_grid(~year)</code></h3>
+<p>It overall shows a positive development of <em>life expectancy</em> and <em>GDP per capita</em> over the years, with Europe leading and Africa tailing.</p>
+<pre class="r"><code>ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
+  scale_x_log10() + 
+  facet_grid(~year)</code></pre>
+<p><img src="figures/unnamed-chunk-6-1.png" width="960" /></p>
+</div>
+<div id="area-show-averages-and-use-facet_gridyear" class="section level3">
+<h3>Area: Show averages and use <code>facet_grid(~year)</code></h3>
+<p>This plot also shows a positive development of <em>life expectancy</em> and <em>GDP per capita</em> over the years, without showing differentiation for <em>continents</em>.</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(continent, year) %&gt;% 
+  summarise(meanLifeExp = round(mean(lifeExp), 0),
+            meanGdpPercap = round(mean(gdpPercap), 0)) %&gt;%
+  ggplot() +
+  geom_area(aes(meanGdpPercap, meanLifeExp), stat = &quot;identity&quot;) +
+  scale_x_log10() +
+  facet_grid(~year)</code></pre>
+<p><img src="figures/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+<div id="animated-plots" class="section level1">
+<h1>Animated plots</h1>
+<p>The package <strong>gganimate</strong> gives me another possibility: to have initial plot for every year provided and to display them in a series. In this case the variable <em>year</em> needs to be set as the <em>frame</em>.</p>
+<div id="animated-scatterplot" class="section level3">
+<h3>Animated scatterplot</h3>
+<p>The animated scatter plot shows me the initial plot (i.e., two variables on the axes and the one variable as color fill). In addition, each frame shows a specific year. Frames change every second. Hence, it is possible to view developments over time.</p>
+<pre class="r"><code>&gt; gg_animate(ggplot(gapminder) +
++             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
++             scale_x_log10())</code></pre>
+<p><img src="figures/unnamed-chunk-9-1.png" width="672" /><img src="figures/unnamed-chunk-9-2.png" width="672" /><img src="figures/unnamed-chunk-9-3.png" width="672" /><img src="figures/unnamed-chunk-9-4.png" width="672" /><img src="figures/unnamed-chunk-9-5.png" width="672" /><img src="figures/unnamed-chunk-9-6.png" width="672" /><img src="figures/unnamed-chunk-9-7.png" width="672" /><img src="figures/unnamed-chunk-9-8.png" width="672" /><img src="figures/unnamed-chunk-9-9.png" width="672" /><img src="figures/unnamed-chunk-9-10.png" width="672" /><img src="figures/unnamed-chunk-9-11.png" width="672" /><img src="figures/unnamed-chunk-9-12.png" width="672" /></p>
+<p>A <code>facet_grid(~continent)</code> further allows now a differentiation on the individual continent developments.</p>
+<pre class="r"><code>&gt; gg_animate(ggplot(gapminder) +
++             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
++             scale_x_log10() +
++              facet_grid(~continent)) </code></pre>
+<p><img src="figures/unnamed-chunk-10-1.png" width="672" /><img src="figures/unnamed-chunk-10-2.png" width="672" /><img src="figures/unnamed-chunk-10-3.png" width="672" /><img src="figures/unnamed-chunk-10-4.png" width="672" /><img src="figures/unnamed-chunk-10-5.png" width="672" /><img src="figures/unnamed-chunk-10-6.png" width="672" /><img src="figures/unnamed-chunk-10-7.png" width="672" /><img src="figures/unnamed-chunk-10-8.png" width="672" /><img src="figures/unnamed-chunk-10-9.png" width="672" /><img src="figures/unnamed-chunk-10-10.png" width="672" /><img src="figures/unnamed-chunk-10-11.png" width="672" /><img src="figures/unnamed-chunk-10-12.png" width="672" /></p>
+</div>
+<div id="line-chart" class="section level3">
+<h3>Line chart</h3>
+<pre class="r"><code>&gt; gg_animate(gapminder %&gt;%
++   group_by(continent, year) %&gt;% 
++   summarise(meanLifeExp = round(mean(lifeExp), 0),
++             meanGdpPercap = round(mean(gdpPercap), 0)) %&gt;%
++   ggplot() +
++   geom_line(aes(meanGdpPercap, meanLifeExp, frame = year), stat = &quot;identity&quot;) +
++   scale_x_log10()) </code></pre>
+<p><img src="figures/unnamed-chunk-11-1.png" width="672" /><img src="figures/unnamed-chunk-11-2.png" width="672" /><img src="figures/unnamed-chunk-11-3.png" width="672" /><img src="figures/unnamed-chunk-11-4.png" width="672" /><img src="figures/unnamed-chunk-11-5.png" width="672" /><img src="figures/unnamed-chunk-11-6.png" width="672" /><img src="figures/unnamed-chunk-11-7.png" width="672" /><img src="figures/unnamed-chunk-11-8.png" width="672" /><img src="figures/unnamed-chunk-11-9.png" width="672" /><img src="figures/unnamed-chunk-11-10.png" width="672" /><img src="figures/unnamed-chunk-11-11.png" width="672" /><img src="figures/unnamed-chunk-11-12.png" width="672" /></p>
+</div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p><strong>gganimate</strong> is an interesting package with some advantages. I will try to use it more often from now on. One open question would be whether it is possible to change <em>width</em> and <em>height</em> of the animated plots.</p>
+<p><strong>1. Data analysis, i.e., does it help to generate insights more efficiently?</strong></p>
+<p>In terms of data analysis it brings only few benefits. Other plots and means of exploration are available to understand the data, such as histograms, table view, or facet grids.</p>
+<p><strong>2. Data visualiazation, i.e., does it help to better communicate findings? </strong></p>
+<p>In terms of data visualization I believe <strong>gganimate</strong> is helpful. The <em>frame</em> provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its <em>development</em> over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might <em>engange</em> much more with the plot.</p>
+</div>
+
+
+
+</div>
+
+        <footer class="post-footer clearfix">
+    
+
+    <div class="share">
+        <a class="icon-twitter" href="https://twitter.com/share?text=gganimate%20-%20Packages%20functionality%20examples%20using%20Gapminder%20data&url=%2f2016%2f11%2f22%2f201611_gganimate_packages_functionality_examples_using_gapminder_data%2f"
+            onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+            <i class="fa fa-twitter"></i>
+            <span class="hidden">Twitter</span>
+        </a>
+
+        <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=%2f2016%2f11%2f22%2f201611_gganimate_packages_functionality_examples_using_gapminder_data%2f"
+            onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+            <i class="fa fa-facebook"></i>
+            <span class="hidden">Facebook</span>
+        </a>
+
+        <a class="icon-google-plus" href="https://plus.google.com/share?url=%2f2016%2f11%2f22%2f201611_gganimate_packages_functionality_examples_using_gapminder_data%2f"
+           onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+           <i class="fa fa-google-plus"></i>
+            <span class="hidden">Google+</span>
+        </a>
+    </div>
+</footer>
+
+        
+    </article>
+</div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="site-title-wrapper">
+                    <h1 class="site-title">
+                        <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                    </h1>
+                    <a class="button-square button-jump-top js-jump-top" href="#">
+                        <i class="fa fa-angle-up"></i>
+                    </a>
+                </div>
+
+                <p class="footer-copyright">
+                    <span>&copy; 2017 / Powered by <a href="https://gohugo.io/">Hugo</a></span>
+                </p>
+                <p class="footer-copyright">
+                    <span><a href="https://github.com/roryg/ghostwriter">Ghostwriter theme</a> By <a href="http://jollygoodthemes.com">JollyGoodThemes</a></span>
+                    <span>/ <a href="https://github.com/jbub/ghostwriter">Ported</a> to Hugo By <a href="https://github.com/jbub">jbub</a></span>
+                </p>
+            </div>
+        </footer>
+
+        <script src="../../../../js/jquery-1.11.3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <script src="../../../../js/jquery.fitvids.js"></script>
+        <script src="../../../../js/scripts.js"></script>
+    </body>
+</html>
+

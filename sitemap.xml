@@ -2,28 +2,46 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://gresch.github.io/</loc>
-    <lastmod>2016-11-22T08:42:35+02:00</lastmod>
+    <loc>/2017/01/17/201701oktoberfest1985-2015/</loc>
+    <lastmod>2017-01-17T11:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/blog/2016-11-22%20gganimate%20-%20Packages%20functionality%20examples%20using%20Gapminder%20data/</loc>
-    <lastmod>2016-11-22T08:42:35+02:00</lastmod>
+    <loc>/2016/11/22/201611_gganimate_packages_functionality_examples_using_gapminder_data/</loc>
+    <lastmod>2016-11-22T21:13:14-05:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/blog/2016-09-22%20Data%20Science%20-%20R%20Script%20to%20Analyze%20BPMN%20Diagrams/</loc>
+    <loc>/2016/09/22/201609_datascience_r_script_to_analyze_bpmn_diagrams/</loc>
     <lastmod>2016-09-22T08:42:35+02:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/about/</loc>
-    <lastmod>2016-09-21T14:12:59+02:00</lastmod>
+    <loc>/page/about/</loc>
+    <lastmod>2016-05-05T21:48:51-07:00</lastmod>
   </url>
   
   <url>
-    <loc>https://gresch.github.io/blog/2014-10-20%20pi%20value%20-%20Exploring%20years%20of%20education%20and%20strong%20opinions%20on%20same%20sex%20relationships/</loc>
-    <lastmod>2014-10-20T08:42:35+02:00</lastmod>
+    <loc>/2014/10/20/201410_p-value_same_sex_and_education_analysis/</loc>
+    <lastmod>2014-10-20T02:13:50+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/page/</loc>
+    <lastmod>2016-05-05T21:48:51-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2017-01-17T11:13:14-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2017-01-17T11:13:14-05:00</lastmod>
+    <priority>0</priority>
   </url>
   
 </urlset>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>gresch - adventures in data science</title>
-    <link>/index.xml</link>
-    <description>Recent content on gresch - adventures in data science</description>
+    <title>Posts on gresch - adventures in data science</title>
+    <link>/post/index.xml</link>
+    <description>Recent content in Posts on gresch - adventures in data science</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>gresch</copyright>
     <lastBuildDate>Tue, 17 Jan 2017 11:13:14 -0500</lastBuildDate>
-    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>A brief analysis of available open data on Oktoberfest in Munich, Germany from 1985 until 2015</title>
@@ -753,29 +753,12 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 
 &lt;h1 id=&#34;process-example&#34;&gt;Process example&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;./img/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../img/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;result&#34;&gt;Result&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;./img/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
-&lt;img src=&#34;./img/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>/page/about/</link>
-      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
-      
-      <guid>/page/about/</guid>
-      <description>&lt;p&gt;Hello. I am a strategy consultant.&lt;/p&gt;
-
-&lt;p&gt;At the same time I am intrigued by Datascience and data visualization in two ways. First I find it incredible interesting what can be learned from data analysis. Second, I realized I enjoy thinking about data, algorithms and to understand the art of visualizing the meaning hidden in data.&lt;/p&gt;
-
-&lt;p&gt;So here I am. I will start with Datascience. I will start this blog to write about my little steps into learning more about it.&lt;/p&gt;
-
-&lt;p&gt;All the best,
-gresch&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;../img/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
+&lt;img src=&#34;../img/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
