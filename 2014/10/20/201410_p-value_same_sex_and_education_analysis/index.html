@@ -14,14 +14,10 @@
 <meta property="og:description" content="Main objective: Exploring years of education and strong opinions on same sex relationships; My goal: learn more about p value analysis">
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2014/10/20/201410_p-value_same_sex_and_education_analysis/">
-        <link rel="stylesheet" href="../../../../dist/styles.css">
+        <link rel="stylesheet" href="/dist/styles.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin,cyrillic-ext,latin-ext,cyrillic">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         
-
-
-
-
     </head>
     <body>
         
@@ -54,10 +50,10 @@
                     <div class="site-title-wrapper">
                         
                             <h1 class="site-title">
-                                <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                                <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
                             </h1>
                         
-                        <a class="button-square" href="../../../../index.xml"><i class="fa fa-rss"></i></a>
+                        <a class="button-square" href="/index.xml"><i class="fa fa-rss"></i></a>
                         
                             <a class="button-square button-social hint--top" data-hint="Twitter" title="Twitter" href="https://twitter.com/gre__sch">
                                 <i class="fa fa-twitter"></i>
@@ -78,11 +74,11 @@
                     <ul class="site-nav">
                         
     <li class="site-nav-item">
-        <a title="Blog" href="../../../../">Blog</a>
+        <a title="Blog" href="/">Blog</a>
     </li>
 
     <li class="site-nav-item">
-        <a title="About" href="../../../../page/about/">About</a>
+        <a title="About" href="/page/about/">About</a>
     </li>
 
                     </ul>
@@ -113,9 +109,7 @@
         <div class="post-content clearfix" itemprop="articleBody">
     
 
-
-
-<div id="introduction" class="section level1">
+    <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>This document summarizes my project I did for the Coursera <a href="https://www.coursera.org/specializations/statistics">Master Statistics with R</a> class. I decided to explore the following question: “<strong>Is there a relationship between strong opinions on same sex relationships and years of education?</strong>”.</p>
 <p>The world changes. And as it changes people and states become more liberal – even when it comes to topics of same sex relationships. A strong belief that same sex relationships are wrong may root in religion or family values. However, as the Economist explains (<a href="http://www.economist.com/node/17227800?story_id=17227800" class="uri">http://www.economist.com/node/17227800?story_id=17227800</a>), in 1995 fewer than half of Americans (48%) are opposed to gay marriage, while 42% are in favour. Today same sex marriage is legal in more than 30 states in the U.S. (<a href="http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx" class="uri">http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx</a>). In regard of this development I find it worthwhile to understand not only the legal adoption of same-sex relationships, but also how the public adopts to the liberation of same sex relationships. While there exist data analyses on opinion on same sex relationships with respect to religion (<a href="http://www.economist.com/node/17227800?story_id=17227800" class="uri">http://www.economist.com/node/17227800?story_id=17227800</a>) no analysis with respect to years of education exists to the best of my knowledge.</p>
@@ -177,7 +171,7 @@ educhist &lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) + lab
 educdegreehist &lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) + facet_wrap(~degree) + labs(title = &quot;Histogram of HIGHEST YEAR OF SCHOOL COMPLETED, separated by degree&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;)
 # Print both histograms
 multiplot(educhist, educdegreehist, cols=2)</code></pre>
-<p><img src="figures/unnamed-chunk-6-1.png" width="960" /></p>
+<p><img src="/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
 </div>
 <div id="strong-opinion-on-homosexual-relations" class="section level2">
 <h2>Strong OPINION ON HOMOSEXUAL RELATIONS</h2>
@@ -194,7 +188,7 @@ barplotall &lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + labs(
 barplotyears &lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + facet_wrap(~year) + labs(title = &quot;OPINION ON HOMOSEXUAL RELATIONS, differentiated by year&quot;, y = &quot;Count&quot;, x = &quot;OPINION ON HOMOSEXUAL RELATIONS&quot;) + coord_flip()
 # Print both histograms
 multiplot(barplotall, barplotyears, cols=2)</code></pre>
-<p><img src="figures/unnamed-chunk-7-1.png" width="960" /></p>
+<p><img src="/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 </div>
 </div>
 <div id="inference" class="section level1">
@@ -220,9 +214,9 @@ plotallyears &lt;- ggplot(gssNA, aes(x = educ, fill = strongviewshomosex)) + geo
 plot2012 &lt;- ggplot(gssNA[gssNA$year == 2012,], aes(x = educ, fill = strongviewshomosex)) + geom_bar(position=&quot;fill&quot;, binwidth = 1) + coord_flip() + labs(title=&quot;DISTRIBUTION FOR 2012&quot;, x = &quot;HIGHEST YEAR OF SCHOOL COMPLETED&quot;, y = &quot;PERCENT&quot;) + theme(legend.position=&quot;bottom&quot;)
 # Print plots
 multiplot(plothist, plotbox, cols=2)</code></pre>
-<p><img src="figures/unnamed-chunk-8-1.png" width="960" /></p>
+<p><img src="/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
 <pre class="r"><code>multiplot(plotallyears, plot2012, cols=2)</code></pre>
-<p><img src="figures/unnamed-chunk-8-2.png" width="960" /></p>
+<p><img src="/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-2.png" width="960" /></p>
 <p>In the following I describe the necessary steps for inference. The project question I want to investigate is :“<em>Is there a relationship between strong opinions on same sex relationships and years of education?</em>”.</p>
 <div id="set-the-hypotheses" class="section level2">
 <h2>Set the hypotheses</h2>
@@ -275,7 +269,7 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)</code></pre>
 ## Standard error = 0.04 
 ## Test statistic: Z =  52.072 
 ## p-value =  0</code></pre>
-<p><img src="figures/unnamed-chunk-11-1.png" width="960" /></p>
+<p><img src="/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
 </div>
 </div>
 <div id="conclusion" class="section level1">
@@ -284,8 +278,6 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)</code></pre>
 <p>The data and the inference show that there is convincing evidence that indeed on average, US citizen that find homosexual relationships <em>Not Wrong At All</em> have more years of education than US citizen that find homosexual relationships <em>Always Wrong</em>.</p>
 <p>In this project I investigated the following question: “<em>Is there a relationship between strong opinions on same sex relationships and years of education?</em>”. The data and the inference test confirmed a relationship between respondents’ strong views on same sex relationships and years of education. Respondents who view same sex relationships as <em>Not Wrong At All</em> have, on average, 14.12 years of education and respondents who view same sex relationships as <em>Always Wrong</em> have, on average, 12.04 years of education.</p>
 </div>
-
-
 
 </div>
 
@@ -324,7 +316,7 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)</code></pre>
             <div class="container">
                 <div class="site-title-wrapper">
                     <h1 class="site-title">
-                        <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                        <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
                     </h1>
                     <a class="button-square button-jump-top js-jump-top" href="#">
                         <i class="fa fa-angle-up"></i>
@@ -341,10 +333,10 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)</code></pre>
             </div>
         </footer>
 
-        <script src="../../../../js/jquery-1.11.3.min.js"></script>
+        <script src="/js/jquery-1.11.3.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
-        <script src="../../../../js/jquery.fitvids.js"></script>
-        <script src="../../../../js/scripts.js"></script>
+        <script src="/js/jquery.fitvids.js"></script>
+        <script src="/js/scripts.js"></script>
     </body>
 </html>
 

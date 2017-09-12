@@ -1,0 +1,16 @@
+base
+datasets
+utils
+grDevices
+graphics
+stats
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+knitr
+scales
+ggthemes

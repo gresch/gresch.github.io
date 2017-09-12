@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Creating a Perry Rhodan main series dataset &middot; gresch</title>
+        <meta name="description" content="IntroductionIn this post I describe how to create a dataset from scraping information from HTML or a Wiki. Perrypedia is a wiki holding information about Perry Rhodan Cite. “Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group.">
+        <meta name="HandheldFriendly" content="True">
+        <meta name="MobileOptimized" content="320">
+        <meta name="generator" content="Hugo 0.18.1" />
+        <meta name="robots" content="index,follow">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:title" content="Creating a Perry Rhodan main series dataset">
+<meta property="og:description" content="IntroductionIn this post I describe how to create a dataset from scraping information from HTML or a Wiki. Perrypedia is a wiki holding information about Perry Rhodan Cite. “Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="/2017/07/30/201707perryrhodandataset/">
+        <link rel="stylesheet" href="/dist/styles.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin,cyrillic-ext,latin-ext,cyrillic">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+    </head>
+    <body>
+        
+        
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        
+        
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    
+
+        <div id="wrapper">
+            <header class="site-header">
+                <div class="container">
+                    <div class="site-title-wrapper">
+                        
+                            <h1 class="site-title">
+                                <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
+                            </h1>
+                        
+                        <a class="button-square" href="/index.xml"><i class="fa fa-rss"></i></a>
+                        
+                            <a class="button-square button-social hint--top" data-hint="Twitter" title="Twitter" href="https://twitter.com/gre__sch">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                        
+                        
+                        
+                            <a class="button-square button-social hint--top" data-hint="Github" title="Github" href="https://github.com/gresch">
+                                <i class="fa fa-github-alt"></i>
+                            </a>
+                        
+                        
+                        
+                        
+                        
+                    </div>
+
+                    <ul class="site-nav">
+                        
+    <li class="site-nav-item">
+        <a title="Blog" href="/">Blog</a>
+    </li>
+
+    <li class="site-nav-item">
+        <a title="About" href="/page/about/">About</a>
+    </li>
+
+                    </ul>
+                </div>
+            </header>
+
+            <div id="container">
+
+
+<div class="container">
+    <article class="post-container" itemscope="" itemtype="http://schema.org/BlogPosting">
+        <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Creating a Perry Rhodan main series dataset</h1>
+    
+    <p class="post-date">
+        <span>Published <time datetime="2017-07-30" itemprop="datePublished">Sun, Jul 30, 2017</time></span>
+        <span>by</span>
+        <span itemscope="" itemprop="author" itemtype="https://schema.org/Person">
+            <span itemprop="name">
+                <a href="https://twitter.com/gre__sch" itemprop="url" rel="author">gresch</a>
+            </span>
+        </span>
+    </p>
+</header>
+
+        <div class="post-content clearfix" itemprop="articleBody">
+    
+
+    <div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In this post I describe how to create a dataset from scraping information from HTML or a Wiki. <a href="https://www.perrypedia.proc.org/">Perrypedia</a> is a wiki holding information about <strong>Perry Rhodan</strong> <a href="https://en.wikipedia.org/wiki/Perry_Rhodan">Cite</a>. “<em>Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group.</em>”</p>
+<div class="figure">
+<img src="/img/wp_PR_2900_1920x1080.jpg" />
+
+</div>
+<p><a href="https://www.perry-rhodan.net/wallpaper-perry-rhodan-erstauflage.html">Perry Rhoden Wallpaper</a></p>
+<p>The data needed for finding out answers to my set questions of interest is found in the aforementioned <a href="https://www.perrypedia.proc.org/wiki/Hauptseite">Perrypedia</a> wiki. For each issue meta data is provided in an HTML table, e.g, <a href="https://www.perrypedia.proc.org/wiki/Unternehmen_Stardust">Issue 1</a>. Meta data includes, <em>series</em>, <em>season</em>, <em>title</em>, <em>subtitle</em>, <em>author</em>, <em>title illustrator</em>, <em>inbound illustrator</em>, <em>release</em>, <em>maincharacters</em>, <em>eventtimeframe</em>, and <em>locations</em>.</p>
+<p>The workflow that I follow is:</p>
+<ol style="list-style-type: decimal">
+<li>Setup</li>
+<li>Save HTML files locally from Perrypedia</li>
+<li>Scrape information from HTML</li>
+<li>Analyze results and improve scraping, repeat step 3</li>
+<li>Amend data with for example gender information</li>
+<li>Save resulting dataset to a CSV file</li>
+</ol>
+<p>My personal motivation to perform this task is to learn how to scrape information from websites. Moreover, I would like to learn about the <a href="https://rpubs.com/bradleyboehmke/data_wrangling">tidyr package</a> to clean data for further analysis.</p>
+<p>Legal disclaimer: <em>Dieser Artikel basiert auf einem Artikel der <a href="https://www.perrypedia.proc.org/">Perrypedia</a> und ist unter den Bedingungen der <a href="http://www.gnu.org/copyleft/fdl.html">GNU FDL</a> verfügbar. Autoren und Quelltext sind dort verfügbar. </em></p>
+</div>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>I use the following libraries:</p>
+<ol style="list-style-type: decimal">
+<li><a href="https://cran.r-project.org/web/packages/futile.logger/index.html">futile.logger</a> for logging</li>
+<li><a href="http://tidyverse.org/">tidyverse</a> for all relevant packages to manipulate and clean data</li>
+<li><a href="https://cran.r-project.org/web/packages/rvest/rvest.pdf">rvest</a> to scrape information from website</li>
+<li><a href="https://cran.r-project.org/web/packages/gender/gender.pdf">gender</a></li>
+</ol>
+<pre class="r"><code># load the tidyverse and other libraries
+library(futile.logger)
+library(tidyverse)
+library(rvest)
+library(stringr)
+library(gender)
+flog.trace(&quot;libraries loaded&quot;)</code></pre>
+<p>Setup of useful constants:</p>
+<pre class="r"><code># set logging threshold
+flog.threshold(INFO)</code></pre>
+<pre><code>## NULL</code></pre>
+<pre class="r"><code># issue numbers to handle
+c_issue_load_from &lt;- 2899
+c_issue_load_to &lt;- 2898
+
+c_issue_scrape_from &lt;- 1
+c_issue_scrape_to &lt;- 2899
+
+
+c_url_base &lt;- &quot;https://www.perrypedia.proc.org/wiki/Quelle:PR&quot;
+c_folder_html &lt;- &quot;C:/tmp/&quot;
+C_folder_csv &lt;- &quot;C:/tmp/&quot;
+c_file_issues_cvs &lt;- &quot;PR_main_issues.csv&quot;
+c_file_characters_cvs &lt;- &quot;PR_main_characters.csv&quot;
+c_file_character_combinations_cvs &lt;- &quot;PR_main_character_combinations.csv&quot;
+c_file_locations_cvs &lt;- &quot;PR_main_locations.csv&quot;
+
+c_xpath_base &lt;-
+  &#39;//*[@id=&quot;mw-content-text&quot;]/div[contains(@class, &quot;perrypedia_std_rframe&quot;)]/table/tr[&#39;
+
+flog.trace(&quot;constants set&quot;)</code></pre>
+<p>Then I setup a new dataframe that represents the information structure:</p>
+<ul>
+<li>season</li>
+<li>title</li>
+<li>subtitle</li>
+<li>author</li>
+<li>release</li>
+<li>maincharacters</li>
+<li>eventtimeframe</li>
+<li>locations</li>
+</ul>
+</div>
+<div id="save-html-files-locally-from-perrypedia" class="section level1">
+<h1>Save HTML files locally from Perrypedia</h1>
+<p>The benefits of downloading all HTMl files include that I can perform any number of scraping attempts without getting it off the web every time – This saves resources and time – and that I can work on this project while I am offline.</p>
+<p>The URLs for each issue of the main series are like this <code>https://www.perrypedia.proc.org/wiki/Quelle:PR2903</code>, where the last four digits are the number of the issue. To build the URLs I need, I created a function.</p>
+<pre class="r"><code>pr_get_issue_urls &lt;- function(from = 2900, to = 2901) {
+  for (i in from:to) {
+    tmp &lt;- str_c(c_url_base, i)
+    if (i == from) {
+      result_vector &lt;- rbind(tmp)
+    } else {
+      result_vector &lt;- result_vector %&gt;%
+        rbind(tmp)
+    }
+  }
+  
+  return(result_vector)
+}
+
+#pr_get_issue_urls()</code></pre>
+<p>The following function reads a web page and saves it to the given folder.</p>
+<pre class="r"><code>pr_get_html &lt;- function(issue_number) {
+  
+  # read html page
+  read_html &lt;- read_html(paste(c_url_base, issue_number, sep = &quot;&quot;))
+  flog.trace(&quot;got html for url: %s&quot;, paste(c_url_base, issue_number, sep = &quot;&quot;))
+  
+  #save html
+  write_xml(read_html, file = paste(c_folder_html, issue_number, &quot;.html&quot;, sep = &quot;&quot;))
+  flog.trace(&quot;wrote html to: %s&quot;, paste(c_folder_html, issue_number, &quot;.html&quot;, sep = &quot;&quot;))
+}</code></pre>
+<p>The following loop then saves all issues from 1 to 2899 to the folder.</p>
+<pre class="r"><code>for (i in c_issue_load_from : c_issue_load_to) {
+  pr_get_html(i)
+}
+
+flog.info(&quot;got HTML from issue %s to issue %s&quot;, c_issue_load_from, c_issue_load_to)</code></pre>
+<pre><code>## INFO [2017-09-11 22:40:23] got HTML from issue 2899 to issue 2898</code></pre>
+</div>
+<div id="scrape-information-from-html" class="section level1">
+<h1>Scrape information from HTML</h1>
+<p>In order to scrape the information that is contained in the HTML page, I need to find the <strong>xpath query</strong> that is <code>//*[@id=&quot;mw-content-text&quot;]/div[contains(@class, &quot;perrypedia_std_rframe&quot;)]/table/tr[i]</code>, where i is a number between 2 and 12. I store the xpath query in the var <code>c_xpath_base</code>.</p>
+<pre class="r"><code>pr_main_series &lt;- tibble(&quot;series&quot;, &quot;season&quot;, &quot;title&quot;, &quot;subtitle&quot;, &quot;author&quot;, &quot;title_pic&quot;, &quot;inbound_ill&quot;, &quot;release&quot;, &quot;maincharacters&quot;, &quot;eventtimeframe&quot;, &quot;locations&quot;) 
+flog.trace(&quot;structure setup&quot;)
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, &quot;.html&quot;, sep = &quot;&quot;)
+  
+  # position of table rows
+  from &lt;- 2
+  to &lt;- 12
+  
+  # intiate result vector
+  result_vector &lt;- c()
+  
+  # read html page
+  read_html &lt;- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    tmp &lt;- read_html %&gt;%
+      html_nodes(xpath = str_c(c_xpath_base, i, &quot;]&quot;)) %&gt;%
+      html_text() %&gt;%
+      str_replace_all(&quot;\n&quot;, &quot;&quot;) %&gt;%
+      str_split(&quot;:&quot;)
+    
+    #flog.trace(&quot;try to bind metadata to result_vector in function pr_read_metadata: %s&quot;,
+    #           tmp)
+    
+    result_vector &lt;- tryCatch({
+      result_vector %&gt;%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error(&quot;could not bind: %s&quot;, cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+  }
+  
+  pr_main_series &lt;- pr_main_series %&gt;% 
+    rbind(result_vector[, 1])
+  flog.trace(&quot;bound %s: &quot;, result_vector[, 1])
+}</code></pre>
+<pre><code>## ERROR [2017-09-11 22:40:33] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:37] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:40] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:42] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:44] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:46] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:49] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:51] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:53] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:56] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:40:58] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:00] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:02] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:04] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:06] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:20] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:22] could not bind: subscript out of bounds
+## ERROR [2017-09-11 22:41:23] could not bind: subscript out of bounds</code></pre>
+<pre class="r"><code>flog.info(&quot;scraped metadata from issue %s to issue %s&quot;, c_issue_scrape_from, c_issue_scrape_to)</code></pre>
+<pre><code>## INFO [2017-09-11 22:41:25] scraped metadata from issue 1 to issue 2899</code></pre>
+</div>
+<div id="analyse-results-and-improve-scraping-repeat-step-3" class="section level1">
+<h1>Analyse results and improve scraping, repeat step 3</h1>
+<p>For some issues (and hence HTML pages and tables) the setting of second’s until twelfth’s attribute does not work. For example, issue 500 is set differently. The information is stored in 3-13. Hence, I amend the script to account for that. Moreover, there are exactly two issues without a release date and some issues without an inbound illustrator.</p>
+<pre class="r"><code>pr_main_series &lt;- tibble(&quot;series&quot;, &quot;season&quot;, &quot;title&quot;, &quot;subtitle&quot;, &quot;author&quot;, &quot;title_pic&quot;, &quot;inbound_ill&quot;, &quot;release&quot;, &quot;maincharacters&quot;, &quot;eventtimeframe&quot;, &quot;locations&quot;) 
+flog.trace(&quot;structure setup&quot;)
+
+# vector with issues that do not have a release date -&gt; need to add a NA
+issues_wo_releasedate &lt;- c(1292, 1573) 
+
+# vector with issues that do not have an inbound illustrator -&gt; need to add a NA
+issues_wo_inill &lt;-
+  c(1301, 
+    1576,
+    1795,
+    1796,
+    1797,
+    1799,
+    1907,
+    1908,
+    1909,
+    1910,
+    1912,
+    1913,
+    1914,
+    1915,
+    1917,
+    1919,
+    1920,
+    1921,
+    1922,
+    1927,
+    1929,
+    1931,
+    1935,
+    1936,
+    1941,
+    1943,
+    1951,
+    1954,
+    1955,
+    1956,
+    1959,
+    1960,
+    1961,
+    1962,
+    1965,
+    2383,
+    2500
+  )
+
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, &quot;.html&quot;, sep = &quot;&quot;)
+  
+  # position of table rows
+  from &lt;- 2
+  to &lt;- 12
+  
+  if (k == 500 |
+      k == 700 |
+      k == 800 |
+      k == 900 |
+      k == 1000 |
+      k == 1100 |
+      k == 1200 |
+      k == 1300 |
+      k == 1400 |
+      k == 1500 |
+      k == 1600 |
+      k == 1700 |
+      k == 1800 |
+      k == 1900 |
+      k == 2000 |
+      k == 2700 |
+      k == 2750 |
+      k == 2800) {
+    from &lt;- 3
+    to &lt;- 13
+    flog.trace(&quot;must be a start of a new cycle&quot;)
+  }
+  
+  # intiate result vector
+  result_vector &lt;- c()
+  
+  # read html page
+  read_html &lt;- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    
+    # for all issues without an inbound illustrator
+    if (k %in% issues_wo_inill &amp; i == 8) {
+      result_vector &lt;- result_vector %&gt;%
+        rbind(NA)
+    } 
+    
+    # for all issues without a release date
+    if (k %in% issues_wo_releasedate &amp; i == 9) {
+      result_vector &lt;- result_vector %&gt;%
+        rbind(NA)
+    } 
+    
+    tmp &lt;- read_html %&gt;%
+      html_nodes(xpath = str_c(c_xpath_base, i, &quot;]&quot;)) %&gt;%
+      html_text() %&gt;%
+      str_replace_all(&quot;\n&quot;, &quot;&quot;) %&gt;%
+      str_split(&quot;:&quot;)
+    
+    #flog.trace(&quot;try to bind metadata to result_vector in function pr_read_metadata: %s&quot;,
+    #           tmp)
+    
+    result_vector &lt;- tryCatch({
+      result_vector %&gt;%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error(&quot;could not bind: %s&quot;, cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+    
+  }
+  
+  pr_main_series &lt;- pr_main_series %&gt;% 
+    rbind(result_vector[, 1])
+  flog.trace(&quot;bound %s: &quot;, result_vector[, 1])
+}
+
+flog.info(&quot;scraped metadata from issue %s to issue %s&quot;, c_issue_scrape_from, c_issue_scrape_to)</code></pre>
+<pre><code>## INFO [2017-09-11 22:42:22] scraped metadata from issue 1 to issue 2899</code></pre>
+<pre class="r"><code>pr_main_series &lt;- pr_main_series[-1,]
+names(pr_main_series) &lt;- gsub(&quot;\&quot;&quot;, &quot;&quot;, names(pr_main_series), fixed = TRUE)
+flog.trace(&quot;cleaned data structure&quot;)</code></pre>
+</div>
+<div id="amend-data-with-for-example-gender-information" class="section level1">
+<h1>Amend data with for example gender information</h1>
+<p>The resulting data set is captured. Nevertheless, we can compute additional variables with the given variables. I try to capture this additional information:</p>
+<ol style="list-style-type: decimal">
+<li>The release year from the release information, which is not structured</li>
+<li>Gender information for all authors based on first names</li>
+<li>Extract issue number</li>
+<li>Extract additional data sets for locations and main characters</li>
+</ol>
+<div id="release-year" class="section level2">
+<h2>Release year</h2>
+<p>Release information is provided as 1) <em>Freitag, 8. September 1961</em>, 2) <em>1961</em>, or 3) <em>April 1999</em>. To get the year, I try to get the last four characters.</p>
+<pre class="r"><code>head(pr_main_series$release)</code></pre>
+<pre><code>## [1] &quot;Freitag, 8. September 1961&quot;  &quot;Freitag, 15. September 1961&quot;
+## [3] &quot;Freitag, 22. September 1961&quot; &quot;Freitag, 29. September 1961&quot;
+## [5] &quot;Freitag, 6. Oktober 1961&quot;    &quot;Freitag, 13. Oktober 1961&quot;</code></pre>
+<pre class="r"><code>pr_main_series$release_year &lt;- as.numeric(substr(pr_main_series$release, nchar(pr_main_series$release)-3, nchar(pr_main_series$release)))
+
+pr_main_series %&gt;% 
+  filter(is.na(release_year))</code></pre>
+<pre><code>## # A tibble: 4 × 12
+##                                                                        series
+##                                                                         &lt;chr&gt;
+## 1         Perry Rhodan-Heftserie (Band 1292)© Pabel-Moewig Verlag KG, Rastatt
+## 2         Perry Rhodan-Heftserie (Band 1573)© Pabel-Moewig Verlag KG, Rastatt
+## 3  Perry Rhodan-Heftserie (Band 2472)© Pabel-Moewig Verlag KG, RastattInnenil
+## 4  Perry Rhodan-Heftserie (Band 2680)© Pabel-Moewig Verlag KG, RastattInnenil
+## # ... with 11 more variables: season &lt;chr&gt;, title &lt;chr&gt;, subtitle &lt;chr&gt;,
+## #   author &lt;chr&gt;, title_pic &lt;chr&gt;, inbound_ill &lt;chr&gt;, release &lt;chr&gt;,
+## #   maincharacters &lt;chr&gt;, eventtimeframe &lt;chr&gt;, locations &lt;chr&gt;,
+## #   release_year &lt;dbl&gt;</code></pre>
+<pre class="r"><code># set all NAs to correct values
+pr_main_series &lt;- 
+  pr_main_series %&gt;% 
+  mutate(release_year = replace(release_year, grepl(&#39;1292&#39;, series), 1986))
+
+pr_main_series &lt;- 
+  pr_main_series %&gt;% 
+  mutate(release_year = replace(release_year, grepl(&#39;1573&#39;, series), 1991))
+
+pr_main_series &lt;- 
+  pr_main_series %&gt;% 
+  mutate(release_year = replace(release_year, grepl(&#39;2472&#39;, series), 2008))
+
+pr_main_series &lt;- 
+  pr_main_series %&gt;% 
+  mutate(release_year = replace(release_year, grepl(&#39;2680&#39;, series), 2012))</code></pre>
+</div>
+<div id="extract-issue-number" class="section level2">
+<h2>Extract issue number</h2>
+<pre class="r"><code>pr_main_series$series &lt;- sub(&quot;\\).*&quot;, &quot;&quot;, sub(&quot;.*\\(&quot;, &quot;&quot;, pr_main_series$series)) 
+
+pr_main_series</code></pre>
+<pre><code>## # A tibble: 2,899 × 12
+##     series           season                       title
+##      &lt;chr&gt;            &lt;chr&gt;                       &lt;chr&gt;
+## 1   Band 1 Die Dritte Macht      Unternehmen Stardust
+## 2   Band 2 Die Dritte Macht            Die dritte Macht
+## 3   Band 3 Die Dritte Macht       Die strahlende Kuppel
+## 4   Band 4 Die Dritte Macht             Götterdämmerung
+## 5   Band 5 Die Dritte Macht                  Atom-Alarm
+## 6   Band 6 Die Dritte Macht          Das Mutanten-Korps
+## 7   Band 7 Die Dritte Macht        Invasion aus dem All
+## 8   Band 8 Die Dritte Macht              Die Venusbasis
+## 9   Band 9 Die Dritte Macht          Hilfe für die Erde
+## 10 Band 10 Die Dritte Macht Raumschlacht im Wega-Sektor
+## # ... with 2,889 more rows, and 9 more variables: subtitle &lt;chr&gt;,
+## #   author &lt;chr&gt;, title_pic &lt;chr&gt;, inbound_ill &lt;chr&gt;, release &lt;chr&gt;,
+## #   maincharacters &lt;chr&gt;, eventtimeframe &lt;chr&gt;, locations &lt;chr&gt;,
+## #   release_year &lt;dbl&gt;</code></pre>
+</div>
+<div id="extract-double-authorship" class="section level2">
+<h2>Extract double authorship</h2>
+<pre class="r"><code># harmonize deliminator
+
+pr_main_series &lt;-
+  pr_main_series %&gt;%
+  mutate(author = str_replace(author, &quot; &amp; &quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot; / &quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot; /&quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot;/ &quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot;/&quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot;, &quot;, &quot; - &quot;)) %&gt;% 
+  mutate(author = str_replace(author, &quot; und &quot;, &quot; - &quot;)) 
+  
+# first split the characters
+pr_main_series &lt;- pr_main_series %&gt;% 
+  separate(author, c(&quot;a1&quot;, &quot;a2&quot;), sep = &quot; - &quot;)
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_series &lt;- pr_main_series %&gt;% 
+  gather(author_pos, author, a1, a2, na.rm = TRUE) %&gt;% 
+  arrange(series)
+
+# Get rid of dubletes
+pr_main_series &lt;- pr_main_series %&gt;% 
+  mutate(author = replace(author, grepl(&#39;Scheer&#39;, author), &quot;K. H. Scheer&quot;))
+
+pr_main_series &lt;- pr_main_series %&gt;% 
+  mutate(author = replace(author, grepl(&#39;Francis&#39;, author), &quot;H. G. Francis&quot;))</code></pre>
+</div>
+<div id="authors-gender-information" class="section level2">
+<h2>Authors’ gender information</h2>
+<p>First, I extract first names from the author variable. Then I extract a new data set with all authors, that I apply the <a href="https://cran.r-project.org/web/packages/gender/gender.pdf"><strong>gender</strong> package</a> to classify authors with their gender. Following that I will add manually gender information where the package did not conclude anything. Finally, I join the gender information back to the main data set.</p>
+<pre class="r"><code># separate first and last names
+pr_main_series &lt;- pr_main_series %&gt;% 
+  separate(author, c(&quot;author_firstname&quot;, &quot;author_lastname&quot;), remove = FALSE)
+
+# create new data set
+pr_author &lt;- pr_main_series %&gt;% 
+  select(author_firstname, author_lastname, author) %&gt;% 
+  distinct(author_firstname, author_lastname, author) %&gt;% 
+  arrange(author_lastname)
+
+# find gender for first names
+names_and_gender &lt;- gender(unique(pr_author$author_firstname), method = &quot;napp&quot;)
+pr_author &lt;- pr_author %&gt;% 
+  left_join(names_and_gender, by = c(&quot;author_firstname&quot; = &quot;name&quot;)) %&gt;% 
+  select(author_firstname, author_lastname, author, gender) %&gt;% 
+  arrange(desc(gender))
+
+rm(names_and_gender)</code></pre>
+<p>There are 12 authors where the <strong>gender package</strong> could not conclude the gender (cf. table below). I will set them all to male.</p>
+<pre class="r"><code>pr_author %&gt;% 
+  filter(is.na(gender))</code></pre>
+<pre><code>## # A tibble: 8 × 4
+##   author_firstname author_lastname         author gender
+##              &lt;chr&gt;           &lt;chr&gt;          &lt;chr&gt;  &lt;chr&gt;
+## 1              Uwe           Anton      Uwe Anton   &lt;NA&gt;
+## 2                H               G  H. G. Francis   &lt;NA&gt;
+## 3                H               G    H. G. Ewers   &lt;NA&gt;
+## 4                K               H   K. H. Scheer   &lt;NA&gt;
+## 5          Gisbert           Haefs  Gisbert Haefs   &lt;NA&gt;
+## 6            Horst        Hoffmann Horst Hoffmann   &lt;NA&gt;
+## 7              Wim       Vandemaan  Wim Vandemaan   &lt;NA&gt;
+## 8                W               W    W. W. Shols   &lt;NA&gt;</code></pre>
+<pre class="r"><code># set all NAs to male
+pr_author &lt;- pr_author %&gt;% 
+  mutate(gender = replace(gender, is.na(gender) , &quot;male&quot;))
+
+pr_author$gender &lt;- as.factor(pr_author$gender)</code></pre>
+<p>Finally, I join the gender information to the main data set.</p>
+<pre class="r"><code>pr_main_series &lt;- pr_main_series %&gt;% 
+  select(-author_firstname, -author_lastname) %&gt;% 
+  left_join(pr_author, by = c(&quot;author&quot; = &quot;author&quot;))
+
+pr_main_series &lt;- pr_main_series %&gt;% 
+  select(-author_firstname, -author_lastname) 
+
+rm(pr_author)
+
+pr_main_series</code></pre>
+<pre><code>## # A tibble: 2,914 × 14
+##       series              season                       title
+##        &lt;chr&gt;               &lt;chr&gt;                       &lt;chr&gt;
+## 1     Band 1    Die Dritte Macht      Unternehmen Stardust
+## 2    Band 10    Die Dritte Macht Raumschlacht im Wega-Sektor
+## 3   Band 100          Die Posbis               Der Zielstern
+## 4  Band 1000 Die Kosmische Hanse                Der Terraner
+## 5  Band 1001 Die Kosmische Hanse      Die Jäger von Chircool
+## 6  Band 1002 Die Kosmische Hanse            Das weiße Schiff
+## 7  Band 1003 Die Kosmische Hanse            Neulinge an Bord
+## 8  Band 1004 Die Kosmische Hanse   Die Stufen der Erkenntnis
+## 9  Band 1005 Die Kosmische Hanse      Todesfahrt nach Felloy
+## 10 Band 1006 Die Kosmische Hanse       Die Falle von Cratcan
+## # ... with 2,904 more rows, and 11 more variables: subtitle &lt;chr&gt;,
+## #   title_pic &lt;chr&gt;, inbound_ill &lt;chr&gt;, release &lt;chr&gt;,
+## #   maincharacters &lt;chr&gt;, eventtimeframe &lt;chr&gt;, locations &lt;chr&gt;,
+## #   release_year &lt;dbl&gt;, author_pos &lt;chr&gt;, author &lt;chr&gt;, gender &lt;fctr&gt;</code></pre>
+</div>
+<div id="extract-additional-data-sets-for-locations-and-main-characters" class="section level2">
+<h2>Extract additional data sets for locations and main characters</h2>
+<pre class="r"><code># Main characters
+
+pr_main_character &lt;- pr_main_series %&gt;% 
+  select(series, maincharacters, author, gender, author_pos, release_year)
+
+# first split the characters
+pr_main_character &lt;- pr_main_character %&gt;% 
+  separate(maincharacters, c(&quot;C1&quot;, &quot;C2&quot;, &quot;C3&quot;, &quot;C4&quot;, &quot;C5&quot;, &quot;C6&quot;), sep = &quot;, &quot;)
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_character &lt;- pr_main_character %&gt;% 
+    gather(character_pos, maincharacter_name, C1, C2, C3, C4, C5, C6, na.rm = TRUE) %&gt;% 
+  arrange(series)
+
+# main character combinations
+
+
+
+tmp &lt;- pr_main_character %&gt;% 
+    select(series, maincharacter_name, release_year) 
+  
+  pr_main_character_combinations &lt;-
+    expand.grid(unique(as.factor(tmp$maincharacter_name)), unique(as.factor(tmp$maincharacter_name)))
+  #get vector of all titles that each author worked on
+  lauth &lt;- tapply(as.factor(tmp$series), as.factor(tmp$maincharacter_name), FUN=function(x) paste(x)) 
+  myfun &lt;- function(x,y) sum(lauth[[x]] %in% lauth[[y]]) #function
+  
+  flog.trace(&quot;apply function to columns of dataframe, might take a long time&quot;)
+  pr_main_character_combinations$count &lt;- mapply(myfun, x=pr_main_character_combinations$Var2, y=pr_main_character_combinations$Var1) 
+  
+  # remove all combinations with count 0
+  pr_main_character_combinations &lt;- pr_main_character_combinations %&gt;% 
+    filter(count &gt; 0)
+  
+  # change var names
+  pr_main_character_combinations &lt;- pr_main_character_combinations %&gt;% 
+    select(character_1 = Var1, character_2 = Var2, count = count)
+  
+  rm(tmp, lauth, myfun)
+  
+
+# locations
+
+pr_location &lt;- pr_main_series %&gt;% 
+  select(series, locations, author, gender, author_pos, release_year)
+
+# first split the locations
+pr_location &lt;- pr_location %&gt;% 
+  separate(locations, c(&quot;l1&quot;, &quot;l2&quot;, &quot;l3&quot;, &quot;l4&quot;, &quot;l5&quot;, &quot;l6&quot;, &quot;l7&quot;), sep = &quot;, &quot;)
+
+# second gather locations (making a wide dataframe into a long one)
+pr_location &lt;- pr_location %&gt;% 
+    gather(location_pos, location_name, l1, l2, l3, l4, l5, l6, l7, na.rm = TRUE) %&gt;% 
+  arrange(series)</code></pre>
+</div>
+</div>
+<div id="save-resulting-dataset-to-a-csv-file" class="section level1">
+<h1>Save resulting dataset to a CSV file</h1>
+<pre class="r"><code>write_csv(pr_main_series, paste(C_folder_csv, c_file_issues_cvs, sep = &quot;&quot;), append = FALSE)
+write_csv(pr_main_character, paste(C_folder_csv, c_file_characters_cvs, sep = &quot;&quot;), append = FALSE)
+write_csv(pr_location, paste(C_folder_csv, c_file_locations_cvs, sep = &quot;&quot;), append = FALSE)
+write_csv(pr_main_character_combinations, paste(C_folder_csv, c_file_character_combinations_cvs, sep = &quot;&quot;), append = FALSE)
+
+flog.info(&quot;wrote csv&quot;)</code></pre>
+<pre><code>## INFO [2017-09-11 22:59:32] wrote csv</code></pre>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>In this blog, I created three <strong>Perry Rhodan</strong> datasets out of information available on the <strong>Perrypedia</strong> wiki. I learned and improved my understanding of:</p>
+<ol style="list-style-type: decimal">
+<li>How to scrape information from web pages</li>
+<li>Use basics like the <code>%in%</code> operator</li>
+<li>How to clean data</li>
+<li>How to apply the gender package.</li>
+</ol>
+<dl>
+<dt>Please feel free to ask me any questions or point out better solutions to some of the things I did.</dt>
+<dd><p>gresch</p>
+</dd>
+</dl>
+</div>
+
+</div>
+
+        <footer class="post-footer clearfix">
+    
+
+    <div class="share">
+        <a class="icon-twitter" href="https://twitter.com/share?text=Creating%20a%20Perry%20Rhodan%20main%20series%20dataset&url=%2f2017%2f07%2f30%2f201707perryrhodandataset%2f"
+            onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+            <i class="fa fa-twitter"></i>
+            <span class="hidden">Twitter</span>
+        </a>
+
+        <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=%2f2017%2f07%2f30%2f201707perryrhodandataset%2f"
+            onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+            <i class="fa fa-facebook"></i>
+            <span class="hidden">Facebook</span>
+        </a>
+
+        <a class="icon-google-plus" href="https://plus.google.com/share?url=%2f2017%2f07%2f30%2f201707perryrhodandataset%2f"
+           onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+           <i class="fa fa-google-plus"></i>
+            <span class="hidden">Google+</span>
+        </a>
+    </div>
+</footer>
+
+        
+    </article>
+</div>
+
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <div class="site-title-wrapper">
+                    <h1 class="site-title">
+                        <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
+                    </h1>
+                    <a class="button-square button-jump-top js-jump-top" href="#">
+                        <i class="fa fa-angle-up"></i>
+                    </a>
+                </div>
+
+                <p class="footer-copyright">
+                    <span>&copy; 2017 / Powered by <a href="https://gohugo.io/">Hugo</a></span>
+                </p>
+                <p class="footer-copyright">
+                    <span><a href="https://github.com/roryg/ghostwriter">Ghostwriter theme</a> By <a href="http://jollygoodthemes.com">JollyGoodThemes</a></span>
+                    <span>/ <a href="https://github.com/jbub/ghostwriter">Ported</a> to Hugo By <a href="https://github.com/jbub">jbub</a></span>
+                </p>
+            </div>
+        </footer>
+
+        <script src="/js/jquery-1.11.3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+        <script src="/js/jquery.fitvids.js"></script>
+        <script src="/js/scripts.js"></script>
+    </body>
+</html>
+

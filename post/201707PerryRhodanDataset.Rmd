@@ -1,0 +1,595 @@
+---
+title: "Creating a Perry Rhodan main series dataset"
+author: "[gresch](https://twitter.com/gre__sch)"
+date: 2017-09-12T11:13:14-05:00
+---
+
+# Introduction
+
+In this post I describe how to create a dataset from scraping information from HTML or a Wiki. [Perrypedia](https://www.perrypedia.proc.org/) is a wiki holding information about **Perry Rhodan** [Cite](https://en.wikipedia.org/wiki/Perry_Rhodan). "*Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group.*" 
+
+![](/img/wp_PR_2900_1920x1080.jpg)
+
+<a href="https://www.perry-rhodan.net/wallpaper-perry-rhodan-erstauflage.html">Perry Rhoden Wallpaper</a>
+
+The data needed for finding out answers to my set questions of interest is found in the aforementioned [Perrypedia](https://www.perrypedia.proc.org/wiki/Hauptseite) wiki. For each issue meta data is provided in an HTML table, e.g, [Issue 1](https://www.perrypedia.proc.org/wiki/Unternehmen_Stardust). Meta data includes, *series*, *season*, *title*, *subtitle*, *author*, *title illustrator*, *inbound illustrator*, *release*, *maincharacters*, *eventtimeframe*, and *locations*.
+
+The workflow that I follow is:
+
+1. Setup
+2. Save HTML files locally from Perrypedia
+3. Scrape information from HTML
+4. Analyze results and improve scraping, repeat step 3
+5. Amend data with for example gender information
+6. Save resulting dataset to a CSV file
+
+My personal motivation to perform this task is to learn how to scrape information from websites. Moreover, I would like to learn about the [tidyr package](https://rpubs.com/bradleyboehmke/data_wrangling) to clean data for further analysis.
+
+Legal disclaimer: *Dieser Artikel basiert auf einem Artikel der [Perrypedia](https://www.perrypedia.proc.org/) und ist unter den Bedingungen der [GNU FDL](http://www.gnu.org/copyleft/fdl.html) verfügbar. Autoren und Quelltext sind dort verfügbar. *
+
+# Setup
+
+I use the following libraries:
+
+1. [futile.logger](https://cran.r-project.org/web/packages/futile.logger/index.html) for logging
+2. [tidyverse](http://tidyverse.org/) for all relevant packages to manipulate and clean data
+3. [rvest](https://cran.r-project.org/web/packages/rvest/rvest.pdf) to scrape information from website
+4. [gender](https://cran.r-project.org/web/packages/gender/gender.pdf)
+
+```{r libraries, echo=TRUE, warning = FALSE, message = FALSE}
+# load the tidyverse and other libraries
+library(futile.logger)
+library(tidyverse)
+library(rvest)
+library(stringr)
+library(gender)
+flog.trace("libraries loaded")
+
+```
+
+Setup of useful constants:
+
+```{r constants, echo=TRUE, warning = FALSE, message = FALSE, }
+
+# set logging threshold
+flog.threshold(INFO)
+
+# issue numbers to handle
+c_issue_load_from <- 2899
+c_issue_load_to <- 2898
+
+c_issue_scrape_from <- 2899
+c_issue_scrape_to <- 2899
+
+
+c_url_base <- "https://www.perrypedia.proc.org/wiki/Quelle:PR"
+c_folder_html <- "C:/tmp/"
+C_folder_csv <- "C:/tmp/"
+c_file_issues_cvs <- "PR_main_issues.csv"
+c_file_characters_cvs <- "PR_main_characters.csv"
+c_file_character_combinations_cvs <- "PR_main_character_combinations.csv"
+c_file_locations_cvs <- "PR_main_locations.csv"
+
+c_xpath_base <-
+  '//*[@id="mw-content-text"]/div[contains(@class, "perrypedia_std_rframe")]/table/tr['
+
+flog.trace("constants set")
+
+```
+
+
+Then I setup a new dataframe that represents the information structure:
+
+* season
+* title
+* subtitle
+* author
+* release
+* maincharacters
+* eventtimeframe
+* locations
+
+
+# Save HTML files locally from Perrypedia
+
+The benefits of downloading all HTMl files include that I can perform any number of scraping attempts without getting it off the web every time -- This saves resources and time -- and that I can work on this project while I am offline. 
+
+The URLs for each issue of the main series are like this `https://www.perrypedia.proc.org/wiki/Quelle:PR2903`, where the last four digits are the number of the issue. To build the URLs I need, I created a function.
+
+```{r savelocally, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_get_issue_urls <- function(from = 2900, to = 2901) {
+  for (i in from:to) {
+    tmp <- str_c(c_url_base, i)
+    if (i == from) {
+      result_vector <- rbind(tmp)
+    } else {
+      result_vector <- result_vector %>%
+        rbind(tmp)
+    }
+  }
+  
+  return(result_vector)
+}
+
+#pr_get_issue_urls()
+
+```
+
+The following function reads a web page and saves it to the given folder.
+
+```{r structure, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_get_html <- function(issue_number) {
+  
+  # read html page
+  read_html <- read_html(paste(c_url_base, issue_number, sep = ""))
+  flog.trace("got html for url: %s", paste(c_url_base, issue_number, sep = ""))
+  
+  #save html
+  write_xml(read_html, file = paste(c_folder_html, issue_number, ".html", sep = ""))
+  flog.trace("wrote html to: %s", paste(c_folder_html, issue_number, ".html", sep = ""))
+}
+
+```
+
+The following loop then saves all issues from 1 to 2899 to the folder.
+
+```{r load2, echo=TRUE, warning = FALSE, message = FALSE}
+
+for (i in c_issue_load_from : c_issue_load_to) {
+  pr_get_html(i)
+}
+
+flog.info("got HTML from issue %s to issue %s", c_issue_load_from, c_issue_load_to)
+
+``` 
+
+
+# Scrape information from HTML
+
+In order to scrape the information that is contained in the HTML page, I need to find the **xpath query** that is ``//*[@id="mw-content-text"]/div[contains(@class, "perrypedia_std_rframe")]/table/tr[i]``, where i is a number between 2 and 12. I store the xpath query in the var ``c_xpath_base``.
+
+```{r scrape, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_series <- tibble("series", "season", "title", "subtitle", "author", "title_pic", "inbound_ill", "release", "maincharacters", "eventtimeframe", "locations") 
+flog.trace("structure setup")
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, ".html", sep = "")
+  
+  # position of table rows
+  from <- 2
+  to <- 12
+  
+  # intiate result vector
+  result_vector <- c()
+  
+  # read html page
+  read_html <- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    tmp <- read_html %>%
+      html_nodes(xpath = str_c(c_xpath_base, i, "]")) %>%
+      html_text() %>%
+      str_replace_all("\n", "") %>%
+      str_split(":")
+    
+    #flog.trace("try to bind metadata to result_vector in function pr_read_metadata: %s",
+    #           tmp)
+    
+    result_vector <- tryCatch({
+      result_vector %>%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error("could not bind: %s", cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+  }
+  
+  pr_main_series <- pr_main_series %>% 
+    rbind(result_vector[, 1])
+  flog.trace("bound %s: ", result_vector[, 1])
+}
+
+flog.info("scraped metadata from issue %s to issue %s", c_issue_scrape_from, c_issue_scrape_to)
+
+``` 
+
+
+
+# Analyse results and improve scraping, repeat step 3
+
+For some issues (and hence HTML pages and tables) the setting of second's until twelfth's attribute does not work. For example, issue 500 is set differently. The information is stored in 3-13. Hence, I amend the script to account for that. Moreover, there are exactly two issues without a release date and some issues without an inbound illustrator. 
+
+```{r analyze, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_series <- tibble("series", "season", "title", "subtitle", "author", "title_pic", "inbound_ill", "release", "maincharacters", "eventtimeframe", "locations") 
+flog.trace("structure setup")
+
+# vector with issues that do not have a release date -> need to add a NA
+issues_wo_releasedate <- c(1292, 1573) 
+
+# vector with issues that do not have an inbound illustrator -> need to add a NA
+issues_wo_inill <-
+  c(1301, 
+    1576,
+    1795,
+    1796,
+    1797,
+    1799,
+    1907,
+    1908,
+    1909,
+    1910,
+    1912,
+    1913,
+    1914,
+    1915,
+    1917,
+    1919,
+    1920,
+    1921,
+    1922,
+    1927,
+    1929,
+    1931,
+    1935,
+    1936,
+    1941,
+    1943,
+    1951,
+    1954,
+    1955,
+    1956,
+    1959,
+    1960,
+    1961,
+    1962,
+    1965,
+    2383,
+    2500
+  )
+
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, ".html", sep = "")
+  
+  # position of table rows
+  from <- 2
+  to <- 12
+  
+  if (k == 500 |
+      k == 700 |
+      k == 800 |
+      k == 900 |
+      k == 1000 |
+      k == 1100 |
+      k == 1200 |
+      k == 1300 |
+      k == 1400 |
+      k == 1500 |
+      k == 1600 |
+      k == 1700 |
+      k == 1800 |
+      k == 1900 |
+      k == 2000 |
+      k == 2700 |
+      k == 2750 |
+      k == 2800) {
+    from <- 3
+    to <- 13
+    flog.trace("must be a start of a new cycle")
+  }
+  
+  # intiate result vector
+  result_vector <- c()
+  
+  # read html page
+  read_html <- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    
+    # for all issues without an inbound illustrator
+    if (k %in% issues_wo_inill & i == 8) {
+      result_vector <- result_vector %>%
+        rbind(NA)
+    } 
+    
+    # for all issues without a release date
+    if (k %in% issues_wo_releasedate & i == 9) {
+      result_vector <- result_vector %>%
+        rbind(NA)
+    } 
+    
+    tmp <- read_html %>%
+      html_nodes(xpath = str_c(c_xpath_base, i, "]")) %>%
+      html_text() %>%
+      str_replace_all("\n", "") %>%
+      str_split(":")
+    
+    #flog.trace("try to bind metadata to result_vector in function pr_read_metadata: %s",
+    #           tmp)
+    
+    result_vector <- tryCatch({
+      result_vector %>%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error("could not bind: %s", cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+    
+  }
+  
+  pr_main_series <- pr_main_series %>% 
+    rbind(result_vector[, 1])
+  flog.trace("bound %s: ", result_vector[, 1])
+}
+
+flog.info("scraped metadata from issue %s to issue %s", c_issue_scrape_from, c_issue_scrape_to)
+
+pr_main_series <- pr_main_series[-1,]
+names(pr_main_series) <- gsub("\"", "", names(pr_main_series), fixed = TRUE)
+flog.trace("cleaned data structure")
+
+``` 
+
+
+# Amend data with for example gender information
+
+The resulting data set is captured. Nevertheless, we can compute additional variables with the given variables. I try to capture this additional information:
+
+1. The release year from the release information, which is not structured
+2. Gender information for all authors based on first names
+3. Extract issue number
+4. Extract additional data sets for locations and main characters
+
+## Release year
+
+Release information is provided as 1) *Freitag, 8. September 1961*, 2) *1961*, or 3) *April 1999*. To get the year, I try to get the last four characters. 
+
+```{r release, echo=TRUE, warning = FALSE, message = FALSE}
+
+head(pr_main_series$release)
+
+``` 
+
+```{r release2, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_series$release_year <- as.numeric(substr(pr_main_series$release, nchar(pr_main_series$release)-3, nchar(pr_main_series$release)))
+
+pr_main_series %>% 
+  filter(is.na(release_year))
+
+# set all NAs to correct values
+pr_main_series <- 
+  pr_main_series %>% 
+  mutate(release_year = replace(release_year, grepl('1292', series), 1986))
+
+pr_main_series <- 
+  pr_main_series %>% 
+  mutate(release_year = replace(release_year, grepl('1573', series), 1991))
+
+pr_main_series <- 
+  pr_main_series %>% 
+  mutate(release_year = replace(release_year, grepl('2472', series), 2008))
+
+pr_main_series <- 
+  pr_main_series %>% 
+  mutate(release_year = replace(release_year, grepl('2680', series), 2012))
+
+``` 
+
+## Extract issue number
+
+```{r issuenr, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_series$series <- sub("\\).*", "", sub(".*\\(", "", pr_main_series$series)) 
+
+pr_main_series
+
+``` 
+
+## Extract double authorship
+
+```{r doubleauthorship, echo=TRUE, warning = FALSE, message = FALSE}
+
+# harmonize deliminator
+
+pr_main_series <-
+  pr_main_series %>%
+  mutate(author = str_replace(author, " & ", " - ")) %>% 
+  mutate(author = str_replace(author, " / ", " - ")) %>% 
+  mutate(author = str_replace(author, " /", " - ")) %>% 
+  mutate(author = str_replace(author, "/ ", " - ")) %>% 
+  mutate(author = str_replace(author, "/", " - ")) %>% 
+  mutate(author = str_replace(author, ", ", " - ")) %>% 
+  mutate(author = str_replace(author, " und ", " - ")) 
+  
+# first split the characters
+pr_main_series <- pr_main_series %>% 
+  separate(author, c("a1", "a2"), sep = " - ")
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_series <- pr_main_series %>% 
+  gather(author_pos, author, a1, a2, na.rm = TRUE) %>% 
+  arrange(series)
+
+# Get rid of dubletes
+pr_main_series <- pr_main_series %>% 
+  mutate(author = replace(author, grepl('Scheer', author), "K. H. Scheer"))
+
+pr_main_series <- pr_main_series %>% 
+  mutate(author = replace(author, grepl('Francis', author), "H. G. Francis"))
+
+
+``` 
+
+
+
+## Authors' gender information 
+
+First, I extract first names from the author variable. Then I extract a new data set with all authors, that I apply the [**gender** package](https://cran.r-project.org/web/packages/gender/gender.pdf) to classify authors with their gender. Following that I will add manually gender information where the package did not conclude anything. Finally, I join the gender information back to the main data set.
+
+```{r gender, echo=TRUE, warning = FALSE, message = FALSE}
+
+# separate first and last names
+pr_main_series <- pr_main_series %>% 
+  separate(author, c("author_firstname", "author_lastname"), remove = FALSE)
+
+# create new data set
+pr_author <- pr_main_series %>% 
+  select(author_firstname, author_lastname, author) %>% 
+  distinct(author_firstname, author_lastname, author) %>% 
+  arrange(author_lastname)
+
+# find gender for first names
+names_and_gender <- gender(unique(pr_author$author_firstname), method = "napp")
+pr_author <- pr_author %>% 
+  left_join(names_and_gender, by = c("author_firstname" = "name")) %>% 
+  select(author_firstname, author_lastname, author, gender) %>% 
+  arrange(desc(gender))
+
+rm(names_and_gender)
+
+``` 
+
+There are 12 authors where the **gender package** could not conclude the gender (cf. table below). I will set them all to male. 
+
+```{r na, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_author %>% 
+  filter(is.na(gender))
+
+# set all NAs to male
+pr_author <- pr_author %>% 
+  mutate(gender = replace(gender, is.na(gender) , "male"))
+
+pr_author$gender <- as.factor(pr_author$gender)
+  
+
+``` 
+
+Finally, I join the gender information to the main data set.
+
+```{r join, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_series <- pr_main_series %>% 
+  select(-author_firstname, -author_lastname) %>% 
+  left_join(pr_author, by = c("author" = "author"))
+
+pr_main_series <- pr_main_series %>% 
+  select(-author_firstname, -author_lastname) 
+
+rm(pr_author)
+
+pr_main_series
+
+``` 
+
+## Extract additional data sets for locations and main characters
+
+```{r add, echo=TRUE, warning = FALSE, message = FALSE}
+
+# Main characters
+
+pr_main_character <- pr_main_series %>% 
+  select(series, maincharacters, author, gender, author_pos, release_year)
+
+# first split the characters
+pr_main_character <- pr_main_character %>% 
+  separate(maincharacters, c("C1", "C2", "C3", "C4", "C5", "C6"), sep = ", ")
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_character <- pr_main_character %>% 
+    gather(character_pos, maincharacter_name, C1, C2, C3, C4, C5, C6, na.rm = TRUE) %>% 
+  arrange(series)
+
+# main character combinations
+
+
+
+tmp <- pr_main_character %>% 
+    select(series, maincharacter_name, release_year) 
+  
+  pr_main_character_combinations <-
+    expand.grid(unique(as.factor(tmp$maincharacter_name)), unique(as.factor(tmp$maincharacter_name)))
+  #get vector of all titles that each author worked on
+  lauth <- tapply(as.factor(tmp$series), as.factor(tmp$maincharacter_name), FUN=function(x) paste(x)) 
+  myfun <- function(x,y) sum(lauth[[x]] %in% lauth[[y]]) #function
+  
+  flog.trace("apply function to columns of dataframe, might take a long time")
+  pr_main_character_combinations$count <- mapply(myfun, x=pr_main_character_combinations$Var2, y=pr_main_character_combinations$Var1) 
+  
+  # remove all combinations with count 0
+  pr_main_character_combinations <- pr_main_character_combinations %>% 
+    filter(count > 0)
+  
+  # change var names
+  pr_main_character_combinations <- pr_main_character_combinations %>% 
+    select(character_1 = Var1, character_2 = Var2, count = count)
+  
+  rm(tmp, lauth, myfun)
+  
+
+# locations
+
+pr_location <- pr_main_series %>% 
+  select(series, locations, author, gender, author_pos, release_year)
+
+# first split the locations
+pr_location <- pr_location %>% 
+  separate(locations, c("l1", "l2", "l3", "l4", "l5", "l6", "l7"), sep = ", ")
+
+# second gather locations (making a wide dataframe into a long one)
+pr_location <- pr_location %>% 
+    gather(location_pos, location_name, l1, l2, l3, l4, l5, l6, l7, na.rm = TRUE) %>% 
+  arrange(series)
+
+
+
+
+
+``` 
+
+# Save resulting dataset to a CSV file
+
+```{r save, echo=TRUE, warning = FALSE, message = FALSE}
+
+write_csv(pr_main_series, paste(C_folder_csv, c_file_issues_cvs, sep = ""), append = FALSE)
+write_csv(pr_main_character, paste(C_folder_csv, c_file_characters_cvs, sep = ""), append = FALSE)
+write_csv(pr_location, paste(C_folder_csv, c_file_locations_cvs, sep = ""), append = FALSE)
+write_csv(pr_main_character_combinations, paste(C_folder_csv, c_file_character_combinations_cvs, sep = ""), append = FALSE)
+
+flog.info("wrote csv")
+
+``` 
+
+
+# Conclusion
+
+In this blog, I created three **Perry Rhodan** datasets out of information available on the **Perrypedia** wiki. I learned and improved my understanding of:
+
+1. How to scrape information from web pages
+2. Use basics like the `%in%` operator
+3. How to clean data
+4. How to apply the gender package.
+
+You find the generated files on my [GitHub Repo](https://github.com/gresch/datasets).
+
+Please feel free to ask me any questions or point out better solutions to some of the things I did.
+
+~ gresch
+

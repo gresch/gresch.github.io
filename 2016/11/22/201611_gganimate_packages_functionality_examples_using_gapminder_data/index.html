@@ -16,14 +16,10 @@ Data analysis, i.e., does it help to generate insights more efficiently?Data vi
 Data analysis, i.e., does it help to generate insights more efficiently?Data visualization, i.e., does it help to better communicate findings?">
 <meta property="og:type" content="article">
 <meta property="og:url" content="/2016/11/22/201611_gganimate_packages_functionality_examples_using_gapminder_data/">
-        <link rel="stylesheet" href="../../../../dist/styles.css">
+        <link rel="stylesheet" href="/dist/styles.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&subset=latin,cyrillic-ext,latin-ext,cyrillic">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
         
-
-
-
-
     </head>
     <body>
         
@@ -56,10 +52,10 @@ Data analysis, i.e., does it help to generate insights more efficiently?Data vi
                     <div class="site-title-wrapper">
                         
                             <h1 class="site-title">
-                                <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                                <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
                             </h1>
                         
-                        <a class="button-square" href="../../../../index.xml"><i class="fa fa-rss"></i></a>
+                        <a class="button-square" href="/index.xml"><i class="fa fa-rss"></i></a>
                         
                             <a class="button-square button-social hint--top" data-hint="Twitter" title="Twitter" href="https://twitter.com/gre__sch">
                                 <i class="fa fa-twitter"></i>
@@ -80,11 +76,11 @@ Data analysis, i.e., does it help to generate insights more efficiently?Data vi
                     <ul class="site-nav">
                         
     <li class="site-nav-item">
-        <a title="Blog" href="../../../../">Blog</a>
+        <a title="Blog" href="/">Blog</a>
     </li>
 
     <li class="site-nav-item">
-        <a title="About" href="../../../../page/about/">About</a>
+        <a title="About" href="/page/about/">About</a>
     </li>
 
                     </ul>
@@ -113,9 +109,7 @@ Data analysis, i.e., does it help to generate insights more efficiently?Data vi
         <div class="post-content clearfix" itemprop="articleBody">
     
 
-
-
-<p>I recently found an interesting R package that animates <strong>ggplot2</strong> plots, namely <a href="https://github.com/dgrtwo/gganimate">gganimate</a>. This <a href="http://rmarkdown.rstudio.com/r_notebooks.html">notebook</a> shows some functionalities of it, solely for learning purposes. As a test data set I use <a href="https://www.gapminder.org/data/">gapminder</a> like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_</p>
+    <p>I recently found an interesting R package that animates <strong>ggplot2</strong> plots, namely <a href="https://github.com/dgrtwo/gganimate">gganimate</a>. This <a href="http://rmarkdown.rstudio.com/r_notebooks.html">notebook</a> shows some functionalities of it, solely for learning purposes. As a test data set I use <a href="https://www.gapminder.org/data/">gapminder</a> like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_</p>
 <ol style="list-style-type: decimal">
 <li>Data analysis, i.e., does it help to generate insights more efficiently?</li>
 <li>Data visualization, i.e., does it help to better communicate findings?</li>
@@ -377,7 +371,7 @@ library(dplyr)           # package for data transformation</code></pre>
 <pre class="r"><code>ggplot(gapminder) +
   geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
   scale_x_log10()</code></pre>
-<p><img src="figures/unnamed-chunk-5-1.png" width="960" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
 <p>What are <em>possible</em> ways to look at the <em>development</em> of these variables over time (e.g., years)? Here are some means:</p>
 <ol style="list-style-type: decimal">
 <li>Scatter plot: use of <code>facet_grid(~year)</code></li>
@@ -390,7 +384,7 @@ library(dplyr)           # package for data transformation</code></pre>
   geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
   scale_x_log10() + 
   facet_grid(~year)</code></pre>
-<p><img src="figures/unnamed-chunk-6-1.png" width="960" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
 </div>
 <div id="area-show-averages-and-use-facet_gridyear" class="section level3">
 <h3>Area: Show averages and use <code>facet_grid(~year)</code></h3>
@@ -403,7 +397,7 @@ library(dplyr)           # package for data transformation</code></pre>
   geom_area(aes(meanGdpPercap, meanLifeExp), stat = &quot;identity&quot;) +
   scale_x_log10() +
   facet_grid(~year)</code></pre>
-<p><img src="figures/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 </div>
 <div id="animated-plots" class="section level1">
@@ -415,13 +409,13 @@ library(dplyr)           # package for data transformation</code></pre>
 <pre class="r"><code>&gt; gg_animate(ggplot(gapminder) +
 +             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
 +             scale_x_log10())</code></pre>
-<p><img src="figures/unnamed-chunk-9-1.png" width="672" /><img src="figures/unnamed-chunk-9-2.png" width="672" /><img src="figures/unnamed-chunk-9-3.png" width="672" /><img src="figures/unnamed-chunk-9-4.png" width="672" /><img src="figures/unnamed-chunk-9-5.png" width="672" /><img src="figures/unnamed-chunk-9-6.png" width="672" /><img src="figures/unnamed-chunk-9-7.png" width="672" /><img src="figures/unnamed-chunk-9-8.png" width="672" /><img src="figures/unnamed-chunk-9-9.png" width="672" /><img src="figures/unnamed-chunk-9-10.png" width="672" /><img src="figures/unnamed-chunk-9-11.png" width="672" /><img src="figures/unnamed-chunk-9-12.png" width="672" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-1.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-2.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-3.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-4.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-5.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-6.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-7.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-8.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-9.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-10.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-11.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-12.png" width="672" /></p>
 <p>A <code>facet_grid(~continent)</code> further allows now a differentiation on the individual continent developments.</p>
 <pre class="r"><code>&gt; gg_animate(ggplot(gapminder) +
 +             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
 +             scale_x_log10() +
 +              facet_grid(~continent)) </code></pre>
-<p><img src="figures/unnamed-chunk-10-1.png" width="672" /><img src="figures/unnamed-chunk-10-2.png" width="672" /><img src="figures/unnamed-chunk-10-3.png" width="672" /><img src="figures/unnamed-chunk-10-4.png" width="672" /><img src="figures/unnamed-chunk-10-5.png" width="672" /><img src="figures/unnamed-chunk-10-6.png" width="672" /><img src="figures/unnamed-chunk-10-7.png" width="672" /><img src="figures/unnamed-chunk-10-8.png" width="672" /><img src="figures/unnamed-chunk-10-9.png" width="672" /><img src="figures/unnamed-chunk-10-10.png" width="672" /><img src="figures/unnamed-chunk-10-11.png" width="672" /><img src="figures/unnamed-chunk-10-12.png" width="672" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-1.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-2.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-3.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-4.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-5.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-6.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-7.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-8.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-9.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-10.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-11.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-12.png" width="672" /></p>
 </div>
 <div id="line-chart" class="section level3">
 <h3>Line chart</h3>
@@ -432,7 +426,7 @@ library(dplyr)           # package for data transformation</code></pre>
 +   ggplot() +
 +   geom_line(aes(meanGdpPercap, meanLifeExp, frame = year), stat = &quot;identity&quot;) +
 +   scale_x_log10()) </code></pre>
-<p><img src="figures/unnamed-chunk-11-1.png" width="672" /><img src="figures/unnamed-chunk-11-2.png" width="672" /><img src="figures/unnamed-chunk-11-3.png" width="672" /><img src="figures/unnamed-chunk-11-4.png" width="672" /><img src="figures/unnamed-chunk-11-5.png" width="672" /><img src="figures/unnamed-chunk-11-6.png" width="672" /><img src="figures/unnamed-chunk-11-7.png" width="672" /><img src="figures/unnamed-chunk-11-8.png" width="672" /><img src="figures/unnamed-chunk-11-9.png" width="672" /><img src="figures/unnamed-chunk-11-10.png" width="672" /><img src="figures/unnamed-chunk-11-11.png" width="672" /><img src="figures/unnamed-chunk-11-12.png" width="672" /></p>
+<p><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-1.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-2.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-3.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-4.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-5.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-6.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-7.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-8.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-9.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-10.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-11.png" width="672" /><img src="/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-12.png" width="672" /></p>
 </div>
 </div>
 <div id="conclusion" class="section level1">
@@ -443,8 +437,6 @@ library(dplyr)           # package for data transformation</code></pre>
 <p><strong>2. Data visualiazation, i.e., does it help to better communicate findings? </strong></p>
 <p>In terms of data visualization I believe <strong>gganimate</strong> is helpful. The <em>frame</em> provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its <em>development</em> over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might <em>engange</em> much more with the plot.</p>
 </div>
-
-
 
 </div>
 
@@ -483,7 +475,7 @@ library(dplyr)           # package for data transformation</code></pre>
             <div class="container">
                 <div class="site-title-wrapper">
                     <h1 class="site-title">
-                        <a title="gresch - adventures in data science" href="../../../../">gresch - adventures in data science</a>
+                        <a title="gresch - adventures in data science" href="/">gresch - adventures in data science</a>
                     </h1>
                     <a class="button-square button-jump-top js-jump-top" href="#">
                         <i class="fa fa-angle-up"></i>
@@ -500,10 +492,10 @@ library(dplyr)           # package for data transformation</code></pre>
             </div>
         </footer>
 
-        <script src="../../../../js/jquery-1.11.3.min.js"></script>
+        <script src="/js/jquery-1.11.3.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
-        <script src="../../../../js/jquery.fitvids.js"></script>
-        <script src="../../../../js/scripts.js"></script>
+        <script src="/js/jquery.fitvids.js"></script>
+        <script src="/js/scripts.js"></script>
     </body>
 </html>
 

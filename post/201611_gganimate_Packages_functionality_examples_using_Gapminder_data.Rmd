@@ -1,0 +1,154 @@
+---
+title: "gganimate - Packages functionality examples using Gapminder data"
+author: "[gresch](https://twitter.com/gre__sch)"
+date: 2016-11-22T21:13:14-05:00
+---
+
+I recently found an interesting R package that animates **ggplot2** plots, namely [gganimate](https://github.com/dgrtwo/gganimate). This [notebook](http://rmarkdown.rstudio.com/r_notebooks.html) shows some functionalities of it, solely for learning purposes. As a test data set I use [gapminder](https://www.gapminder.org/data/) like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_
+
+1. Data analysis, i.e., does it help to generate insights more efficiently?
+2. Data visualization, i.e., does it help to better communicate findings?
+
+This notebook is organized as follows: **Setup**, first I show necessary software and settings as well as give an data overview. In **Non-animated plots** I show some plots that I would create in order to assess the data without any animation for a later comparison. In section **Animated plots** I try **gganimate** to create animated plots. I conclude in the last section **Conclusion**.
+
+Contact: [gresch](https://twitter.com/gre__sch)
+
+#Setup
+
+###Software
+
+1. Install R
+2. Install RStudio
+3. Install [ImageMagick](https://www.imagemagick.org/script/binary-releases.php)
+4. Install *gganimate* via ```devtools::install_github("dgrtwo/gganimate") ```
+
+###Libraries
+
+```{r, message=FALSE, warning=FALSE}
+library(gganimate)       # animation package
+library(ggplot2)         # plotting package
+library(gapminder)       # package with data to visualize
+library(dplyr)           # package for data transformation
+```
+
+###Settings
+```{r}
+theme_set(theme_bw())    # set theme to black and white
+```
+
+###Data overview
+
+The data is an *excerpt of the Gapminder data on life expectancy, GDP per capita, and population by country.* It includes 1704 observations with six variables: 
+
+* country
+* continent
+* year
+* lifeExp
+* pop
+* gdpPerCap
+
+```{r}
+knitr::kable(summary(gapminder))
+```
+
+```{r}
+knitr::kable(head(gapminder, 15))
+```
+
+
+# Non-animated plots
+Before testing **gganimate** I will create some plots via **ggplot**. For this analysis I will concentrate on the relationship between *GDP per capita* and *life expectancy at birth*. To increase readability, I log10ed the x-axis and used *color* to differentiate between observations coming from different *continents*. It shows a somewhat positive relationship between these two variables. 
+
+```{r, fig.width=10}
+ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
+  scale_x_log10()
+```
+
+What are *possible* ways to look at the *development* of these variables over time (e.g., years)? Here are some means:
+
+1. Scatter plot: use of ```facet_grid(~year)```
+2. Area: Show averages and use ```facet_grid(~year)```
+
+### Scatterplot: use of ```facet_grid(~year)```
+
+It overall shows a positive development of *life expectancy* and *GDP per capita* over the years, with Europe leading and Africa tailing. 
+
+```{r, fig.width=10}
+ggplot(gapminder) +
+  geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
+  scale_x_log10() + 
+  facet_grid(~year)
+```
+
+### Area: Show averages and use ```facet_grid(~year)```
+
+```{r include = FALSE}
+gapminder %>%
+  group_by(continent, year) %>% 
+  summarise(meanLifeExp = mean(lifeExp)) %>%
+  ggplot() +
+  geom_area(aes(year, meanLifeExp, fill = continent), stat="identity") +
+  facet_grid(~continent)
+```
+
+This plot also shows a positive development of *life expectancy* and *GDP per capita* over the years, without showing differentiation for *continents*. 
+
+```{r}
+gapminder %>%
+  group_by(continent, year) %>% 
+  summarise(meanLifeExp = round(mean(lifeExp), 0),
+            meanGdpPercap = round(mean(gdpPercap), 0)) %>%
+  ggplot() +
+  geom_area(aes(meanGdpPercap, meanLifeExp), stat = "identity") +
+  scale_x_log10() +
+  facet_grid(~year)
+```
+
+# Animated plots
+
+The package **gganimate** gives me another possibility: to have initial plot for every year provided and to display them in a series. In this case the variable *year* needs to be set as the *frame*.
+
+### Animated scatterplot
+
+The animated scatter plot shows me the initial plot (i.e., two variables on the axes and the one variable as color fill). In addition, each frame shows a specific year. Frames change every second. Hence, it is possible to view developments over time.
+
+```{r error=FALSE, warning=FALSE, echo=TRUE, message=FALSE, prompt=TRUE}
+gg_animate(ggplot(gapminder) +
+            geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
+            scale_x_log10())
+```
+
+A ```facet_grid(~continent)``` further allows now a differentiation on the individual continent developments.
+
+```{r error=FALSE, warning=FALSE, echo=TRUE, message=FALSE, prompt=TRUE}
+gg_animate(ggplot(gapminder) +
+            geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
+            scale_x_log10() +
+             facet_grid(~continent)) 
+```
+
+### Line chart
+
+```{r error=FALSE, echo=TRUE, message=FALSE, warning=FALSE, prompt=TRUE}
+gg_animate(gapminder %>%
+  group_by(continent, year) %>% 
+  summarise(meanLifeExp = round(mean(lifeExp), 0),
+            meanGdpPercap = round(mean(gdpPercap), 0)) %>%
+  ggplot() +
+  geom_line(aes(meanGdpPercap, meanLifeExp, frame = year), stat = "identity") +
+  scale_x_log10()) 
+```
+
+# Conclusion
+
+**gganimate** is an interesting package with some advantages. I will try to use it more often from now on. One open question would be whether it is possible to change *width* and *height* of the animated plots.
+
+**1. Data analysis, i.e., does it help to generate insights more efficiently?**
+
+In terms of data analysis it brings only few benefits. Other plots and means of exploration are available to understand the data, such as histograms, table view, or facet grids. 
+
+**2. Data visualiazation, i.e., does it help to better communicate findings? **
+
+In terms of data visualization I believe **gganimate** is helpful. The *frame* provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its  *development* over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might *engange* much more with the plot.
+

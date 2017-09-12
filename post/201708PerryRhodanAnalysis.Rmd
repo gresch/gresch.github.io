@@ -1,0 +1,523 @@
+---
+title: "Analyzing the Perry Rhodan main series"
+author: '[gresch](https://twitter.com/gre__sch)'
+date: '2017-08-11T11:13:14-05:00'
+draft: yes
+---
+
+```{r global_options, include=FALSE, fig.width=10, out.width=10, echo=FALSE}
+# global notebook options
+knitr::opts_chunk$set(fig.width=10, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+# Introduction
+
+In this blog I analyze the **Perry Rhodan** main series. This analysis is based on work described in my previous blog [Creating a Perry Rhodan main series dataset](/2017/07/30/201707perryrhodandataset/). If you never came across this long-lasting science fiction series, I can highly recommend it. 
+
+> Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group. [Cite from Wikipeda](https://en.wikipedia.org/wiki/Perry_Rhodan)
+
+
+The analysis focuses on the weekly issued series that spans over 2.900 issues. For the analysis I would like to know more about:
+
+1. Which authors were active during the recent 55 years?
+2. Which main characters were active in what time span?
+3. Is there a relationship between authors and main characters?
+4. Which characters are mentioned often in one issue?
+5. Which were the most visited locations?
+6. Which were the most visited locations over time?
+7. Who visited which locations?
+8. Which locations were visited by Perry Rhodan over time?
+
+Legal disclaimer: *Dieser Artikel basiert auf einem Artikel der [Perrypedia](https://www.perrypedia.proc.org/) und ist unter den Bedingungen der [GNU FDL](http://www.gnu.org/copyleft/fdl.html) verfügbar. Autoren und Quelltext sind dort verfügbar. *
+
+# Setup
+
+I use the following libraries:
+
+1. [futile.logger](https://cran.r-project.org/web/packages/futile.logger/index.html) for logging
+2. [tidyverse](http://tidyverse.org/) for all relevant packages to manipulate and clean data
+3. stringr for string manipulations
+4. ggthemes for applying themes to ggplot
+5. gganimate
+
+```{r libraries, echo=TRUE, warning = FALSE, message = FALSE}
+
+library(futile.logger)
+library(tidyverse)
+library(stringr)
+library(ggthemes)
+library(gganimate)       # animation package
+flog.trace("libraries loaded")
+
+```
+
+Setup of useful constants:
+
+```{r constants, echo=TRUE, warning = FALSE, message = FALSE }
+
+# set logging threshold
+flog.threshold(INFO)
+
+C_folder_csv <- "C:/tmp/"
+c_file_issue_cvs <- "PR_main_issues.csv"
+c_file_character_cvs <- "PR_main_characters.csv"
+c_file_character_combinations_cvs <- "PR_main_character_combinations.csv"
+c_file_location_cvs <- "PR_main_locations.csv"
+
+r_90_d <- theme(axis.text.x = element_text(angle = 90, hjust = 1))
+caption <- "Analysis and Visualization of Perry Rhodan weekly issues - https://gresch.github.io/"
+my_theme <- theme_hc() 
+cp <- c("#1d3a7b", "#b53fa8", "#224dce", "#529480", "#23f2c0") # color palette "Song of the Unexpected Color Palette" http://www.color-hex.com/color-palette/29752
+
+
+flog.trace("constants set")
+
+```
+
+# Data
+
+There are three datasets available. 
+
+```{r load, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_main_serie <- read_csv(paste0(C_folder_csv, c_file_issue_cvs))
+pr_main_character <- read_csv(paste0(C_folder_csv, c_file_character_cvs))
+pr_main_character_combination <- read_csv(paste0(C_folder_csv, c_file_character_combinations_cvs))
+pr_main_location <- read_csv(paste0(C_folder_csv, c_file_location_cvs))
+
+flog.trace("data loaded")
+``` 
+
+## Perry Rhodan main issues (PR_main_issues.csv)
+
+Holds metadata from the main series. There are 2899 records, each record for an issue. Variables include:
+
+**variable** | **description**
+-------------|----------------
+ series      | issue number   
+ season      | name of the season, mostly 100 issues per season
+ title       | issue title               
+ subtitle    | issue subtitle                 
+ author      | issue author    
+ title_pc    | creator of the front page of the issue
+ inbound_ill | creator of the inbound illustrations of the issue
+ release     | release date                
+ maincharacters | List with main characters of that issue
+ eventtimeframe | time frame of the plot of the issue
+ locations   | List with locations of that issue
+ release year| release year of issue
+ geneder     | gender of issue author
+
+```{r echo=TRUE, warning = FALSE, message = FALSE}
+
+rmarkdown::paged_table(head(pr_main_serie, n = 10))
+  
+``` 
+
+
+# Analysis
+
+## Which authors were active during the recent 55 years?
+
+Naturally, it is impossible to publish a weekly science fiction series with only one or few authors involved. The data shows that there were **47 different authors** involved. Half of them have **five or more** issues written. While the **seven most frequent authors** account for more than 50 percent of all issues. The names of these authors along with their number of written issues is shown below in the table and in the figure.
+
+```{r echo=FALSE, error=FALSE, warning=FALSE, fig.width=10, dpi=300}
+
+rmarkdown::paged_table(
+  pr_main_serie %>%
+    group_by(author) %>%
+    summarise(
+      issues = n(),
+      start_year = min(as.numeric(release_year)),
+      end_year = max(as.numeric(release_year)),
+      active_years = end_year - start_year
+    ) %>%
+    mutate(percentage = round(
+      issues / length(pr_main_serie$release_year) * 100, 0
+    )) %>%
+    arrange(desc(issues))
+)
+
+```
+
+
+```{r echo=FALSE, fig.width=10, fig.height = 10, dpi=600, include= TRUE}
+
+pr_main_serie %>%
+  group_by(author) %>%
+  summarise(n = n()) %>%
+  filter(n > 0) %>% 
+  ggplot() +
+  geom_bar(aes(reorder(author, n), n),
+           stat = "identity",
+           fill = cp[4]) +
+  labs(
+    title = "The seven most frequest authors account for more that 50% of all written issues",
+    subtitle = "Number of issues per author",
+    caption = caption,
+    x = "Author",
+    y = "Number of issues written"
+  ) +
+  scale_y_continuous(#labels = scales::comma,
+    limits = c(0, 260),
+    breaks = seq(0, 260, by = 20)) +
+  #scale_x_continuous(breaks = seq(1985, 2015, by = 1)) +
+  my_theme +
+  coord_flip()
+```
+
+To answer the original question I compare the number of issues written by author for given years. The figure below shows authors and their active writing area. For example, **K.H. Scheer**, together with **Mahr** and **Darlton** show issues from the beginning of 1961. While **Darlton** wrote actively until ca. 1981 and then only wrote few issues during the eighties, **Mahr** had gap years between 68 and 71. Currently, active authors include **Thurner**, **Montillion**, **Anton**, **Haensel**, **Stern**, and **Lukas**.
+
+
+```{r echo=FALSE, fig.width=10, fig.height = 12, dpi=300}
+
+pr_main_serie %>%
+  group_by(author) %>%
+  mutate(
+    year_first_mentioned = min(release_year),
+    year_last_mentioned = max(release_year)
+  ) %>%
+  group_by(author, release_year, gender) %>%
+  summarise(
+    n = n(),
+    year_first_mentioned = min(year_first_mentioned),
+    year_last_mentioned = max(year_last_mentioned)
+  ) %>%
+  filter(n > 0) %>%
+  ggplot() +
+  geom_point(aes(release_year, reorder(author, desc(as.numeric(year_first_mentioned))), size = n, color = gender)) +
+  labs(
+    title = "Number of active authors increases over time",
+    subtitle = "Number of issues per author and year, with at least more than one written issues per author",
+    caption = caption,
+    x = "Year",
+    y = "Author",
+    size = "Number of written issues, pear year",
+    color = "Gender"
+  ) +
+  scale_x_continuous(
+    breaks = seq(1961, 2016, by = 1)) + 
+  my_theme + r_90_d 
+
+```
+
+## Which main characters were active in what time span?
+
+To answer this question, I looked at the main characters mentioned for each issue. Overall, the data contain **6.254** different main characters. Interesting to note is that more than **75 percent** of all characters are only mentioned in **one issue**. The table shows **Perry Rhodan** is mentioned in **45 percent** of all issues analyzed, with **Atlan** mentioned **20 percent**, **Gucky** mentioned **16 percent**, and **Bull** mentioned **13 percent**.
+
+```{r echo=FALSE, fig.width=10, dpi=600}
+rmarkdown::paged_table(
+  pr_main_character %>%
+    filter(author_pos == "a1") %>% # this is necessary because issues with two authors must be counted only once
+    group_by(maincharacter_name) %>%
+    summarise(issues = n()) %>%
+    mutate(percentage = round(issues / length(unique(pr_main_serie$series)) * 100, 0)) %>% 
+    arrange(desc(issues)) 
+)
+```
+
+The figure below shows the number of mentions per character where characters are at least mentioned in more than 30 issues. 
+
+```{r echo=FALSE, fig.width=10, fig.height=10, dpi=600, include= TRUE}
+
+pr_main_character %>%
+  filter(author_pos == "a1") %>% # this is necessary because issues with two authors must be counted only once
+  group_by(maincharacter_name) %>%
+  mutate(count_character = n()) %>%
+  filter(count_character > 20) %>% 
+  group_by(maincharacter_name, release_year) %>%
+  summarise(n = n(),
+            count_character = min(count_character)) %>%
+  ggplot() +
+  geom_bar(aes(reorder(maincharacter_name, count_character), n),
+           stat = "identity",
+  fill = cp[1]) +
+  labs(
+  title = "Perry Rhodan - the hero of this novel - is mentioned in 45% of all issues",
+  subtitle = "Number of mentions as main character per character, with at least more than 20 mentions",
+  caption = caption,
+  x = "Character",
+  y = "Number of mentions as main character"
+  ) +
+  scale_y_continuous(#labels = scales::comma,
+  limits = c(0, 1500),
+  breaks = seq(0, 1500, by = 100)) +
+  #scale_x_continuous(breaks = seq(1985, 2015, by = 1)) +
+  my_theme +
+  coord_flip() 
+```
+
+Another point of view is whether characters are constantly mentioned or whether there were peak times. In order to interpret this figure please note that all bubbles sum up to 100 percent. Greater bubbles do not indicate more written issues in a given year. The size reflects the relative occurrence for a given year. For example, **Thora** is mentioned as main character in the years 61, 62, and 63. Most often in the former two years. **Rhodan** on the other hand has smaller sized bubbles in this year. That only means, that this character is mentioned more or less over all years the same amount. 
+
+The figure below suggests that a number of characters are constantly mentioned. These include **Rhodan, Gucky, Bull, and Atlan**. Interestingly, in the year **1976** there are no mentions of either **Gucky** nor **Bull**. The character **Julian Tifflor** is a constant character until 1989, and from there are some gap years. Also, **Ras Tschubai** is a constant character until **1989**, and from there on [no more mentions](https://www.perrypedia.proc.org/wiki/Ras_Tschubai) at all. 
+
+
+```{r echo=FALSE, fig.width=10, fig.height = 10, dpi=600}
+
+pr_main_character %>%
+  filter(author_pos == "a1") %>% # this is necessary because issues with two authors must be counted only once
+  group_by(maincharacter_name) %>% 
+  mutate(count_character = n(),
+            year_first_mentioned = min(release_year),
+            year_last_mentioned = max(release_year)) %>% 
+  filter(count_character > 25) %>%  # only characters that are at least n times mentioned
+  group_by(maincharacter_name, release_year) %>%
+  mutate(n = n()) %>%
+  summarise(n = min(n),
+            year_first_mentioned = min(year_first_mentioned),
+            year_last_mentioned = max(year_last_mentioned)) %>% 
+  ggplot() +
+  geom_point(aes(release_year, reorder(reorder(maincharacter_name, n), desc(year_first_mentioned)), size = n), color = cp[1]) +
+  labs(
+  title = "Constant characters are Rhodan, Bull, Atlan, Gucky, Tifflo, Tolot, and Saedelaere",
+  subtitle = "Number of mentions as main character per character and year, with at least more than 25 mentions",
+  caption = caption,
+  x = "Year",
+  y = "Character",
+  size = "Number of issues per year"
+  ) +
+  scale_x_continuous(
+    breaks = seq(1961, 2016, by = 1)) + 
+  my_theme + r_90_d
+  
+```
+
+
+## Is there a relationship between authors and main characters?
+
+```{r echo=FALSE, fig.width=10, fig.height = 10, dpi=600}
+rmarkdown::paged_table(
+  pr_main_character %>%
+    group_by(maincharacter_name) %>%
+    mutate(overall_mentions = n()) %>%
+    group_by(author, add = TRUE) %>% 
+    mutate(relativerel = round(n()/overall_mentions*100, 1)) %>% 
+    group_by(maincharacter_name, author) %>% 
+    summarise(relativerel = min(relativerel),
+              overall_mentions = min(overall_mentions)) %>%
+    arrange(author, -overall_mentions, -relativerel) %>% 
+    filter(overall_mentions > 30)
+)
+```
+
+As seen in the above table **Perry Rhodan** is mentioned in 1.324 of analized 2.899 issues. There are **42** different **authors** that list him as one of the main characters. From these 42 authors, **Clark Darlton** lists Perry Rhodan most often, i.e. 9.9%, followed by **William Voltz** and **H.G. Ewers**.
+
+```{r echo=FALSE, fig.width=10, fig.height = 10, dpi=600}
+pr_main_character %>%
+  group_by(maincharacter_name) %>%
+  mutate(overall_mentions = n()) %>%
+  group_by(author, add = TRUE) %>%
+  mutate(relativerel = round(n() / overall_mentions * 100, 1)) %>%
+  group_by(maincharacter_name, author) %>%
+  summarise(
+    relativerel = min(relativerel),
+    overall_mentions = min(overall_mentions)
+  ) %>%
+  arrange(-overall_mentions, -relativerel) %>%
+  filter(overall_mentions > 25) %>%
+  ggplot() +
+  geom_point(aes(author, reorder(maincharacter_name, overall_mentions), size = relativerel), color = cp[1]) +
+  labs(
+    title = "Clark Darlton wrote most frequently about Rhodan and Gucky, while H.G. Ewers about Atlan",
+    subtitle = "Number of mentions as main character per character and year, with at least more than 25 mentions",
+    caption = caption,
+    x = "Relative mentions as main character per author in Percent (each character sums up to 100%)",
+    y = "Character",
+    size = "Relative mentions in percent"
+  ) +
+  my_theme + r_90_d
+```
+
+## Which characters are mentioned often in one issue?
+
+
+
+```{r characterfreq, echo=TRUE, warning = FALSE, message = FALSE, fig.width=10, fig.height = 10, dpi=600}
+pr_main_character_combination %>%
+  filter(count > 30) %>% 
+  filter(character_1 != character_2) %>% 
+  arrange(-count) %>% 
+  ggplot() +
+  geom_point(aes(reorder(character_1, desc(count)), reorder(character_2, desc(count)), size = count), color = cp[1]) +
+  labs(
+    title = "Perry Rhodan is most mentioned in combination with Gucky, Atlan, and Bull",
+    subtitle = "Number of issues where characters were mentioned in combination, with at least more than 30 combinations",
+    caption = caption,
+    x = "Character",
+    y = "Character",
+    size = "Number of issues"
+  ) +
+  my_theme + r_90_d
+
+``` 
+
+```{r charactercomb, echo=TRUE, warning = FALSE, message = FALSE, fig.width=10, fig.height = 10, dpi=600}
+
+pr_main_character_combination %>%
+  filter(count > 30) %>% 
+  filter(character_1 != character_2) %>% 
+  filter(character_1 == "Perry Rhodan") %>% 
+  #filter(Var1 == "Reginald Bull") %>%
+  #filter(Var1 == "Ernst Ellert") %>% 
+  arrange(-count) %>% 
+  ggplot() +
+  geom_bar(aes(reorder(character_2, count), count),
+           stat = "identity",
+  fill = cp[1]) +
+  labs(
+  title = "Perry Rhodan is most mentioned in combination with Gucky, Atlan, or Bull",
+  subtitle = "Number of mentions as main character in combination with Perry Rhodan, with at least more than 10 mentions",
+  caption = caption,
+  x = "Character",
+  y = "Number of mentions in combination with Perry Rhodan"
+  ) +
+  scale_y_continuous(#labels = scales::comma,
+  limits = c(0, 350),
+  breaks = seq(0, 350, by = 20)) +
+  #scale_x_continuous(breaks = seq(1985, 2015, by = 1)) +
+  my_theme +
+  coord_flip() 
+
+``` 
+
+
+
+## Which were the most visited locations?
+
+There altogether **1.653 locations** mentioned. From these, **Terra, Solsystem, and Milkyway** are the ones mentioned most often. 
+
+```{r location_table, echo=TRUE, warning = FALSE, message = FALSE}
+
+rmarkdown::paged_table(
+  pr_main_location %>%
+    filter(author_pos == "a1") %>% 
+    group_by(location_name) %>%
+    summarise(
+      issues = n(),
+      start_year = min(as.numeric(release_year)),
+      end_year = max(as.numeric(release_year)),
+      active_years = end_year - start_year
+    ) %>%
+    mutate(percentage = round(
+      issues / length(pr_main_serie$release_year) * 100, 0
+    )) %>%
+    arrange(desc(issues))
+)
+
+``` 
+
+## Which were the most visited locations over time?
+
+```{r echo=FALSE, fig.width=10, fig.height = 15, dpi=600}
+
+pr_main_location %>%
+  filter(author_pos == "a1") %>% # this is necessary because issues with two authors must be counted only once
+  group_by(location_name) %>% 
+  mutate(count = n(),
+            year_first_mentioned = min(release_year),
+            year_last_mentioned = max(release_year)) %>% 
+  filter(count > 6) %>%  # only characters that are at least n times mentioned
+  group_by(location_name, release_year) %>%
+  mutate(n = n()) %>%
+  summarise(n = min(n),
+            year_first_mentioned = min(year_first_mentioned),
+            year_last_mentioned = max(year_last_mentioned)) %>% 
+  ggplot() +
+  geom_point(aes(release_year, reorder(reorder(location_name, n), desc(year_first_mentioned)), size = n), color = cp[1]) +
+  labs(
+  title = "Terra, Solsystem, and Milkyway are the most constant locations",
+  subtitle = "Number of location mentions per year, with at least more than 6 mentions",
+  caption = caption,
+  x = "Year",
+  y = "Location",
+  size = "Number of issues per year"
+  ) +
+  scale_x_continuous(
+    breaks = seq(1961, 2016, by = 1)) + 
+  my_theme + r_90_d
+  
+```
+
+
+## Who visited which locations?
+
+```{r echo=FALSE, fig.width=10, fig.height = 10, dpi=600}
+
+# join character and location data set
+pr_loc_character <- full_join(pr_main_location, pr_main_character, by = "series")
+
+pr_loc_character %>%
+  filter(author_pos.x == "a1") %>% # this is necessary because issues with two authors must be counted only once
+  group_by(maincharacter_name, location_name) %>% 
+  mutate(count = n()) %>% 
+  filter(count > 6) %>%  # only characters that are at least n times mentioned
+  ggplot() +
+  geom_point(aes(reorder(location_name, count), reorder(maincharacter_name, count), size = count), color = cp[1]) +
+  labs(
+  title = "Rhodan visited the most different locations",
+  subtitle = "Number of mentions as main character per location, with at least more than 6 mentions",
+  caption = caption,
+  x = "Year",
+  y = "Character",
+  size = "Number of issues per year"
+  ) +
+  
+  my_theme + r_90_d
+  
+```
+
+
+## Which locations were visited by Perry Rhodan over time?
+
+```{r locationsPR, echo=TRUE, warning = FALSE, message = FALSE}
+
+pr_loc_character %>%
+  filter(author_pos.x == "a1") %>% # this is necessary because issues with two authors must be counted only once
+  group_by(maincharacter_name, location_name, release_year.x) %>% 
+  mutate(count = n()) %>% 
+  filter(maincharacter_name == "Perry Rhodan") %>%
+  filter(count > 5) %>% 
+  ggplot() +
+  geom_bar(aes(location_name, count),
+           stat = "identity",
+  fill = cp[1]) 
+
+# gg_animate(
+# 
+#   pr_loc_character %>%
+#   filter(author_pos.x == "a1") %>% # this is necessary because issues with two authors must be counted only once
+#   group_by(maincharacter_name, location_name, release_year.x) %>%
+#   mutate(count = n()) %>%
+#   #filter(maincharacter_name == "Perry Rhodan") %>%
+#   filter(count > 2) %>%
+#   ggplot() +
+#   geom_bar(aes(location_name, count, frame = release_year.x),
+#            stat = "identity",
+#   fill = cp[1]) +
+#   labs(
+#   title = "Perry Rhodan is most mentioned in combination with Gucky, Atlan, and Bull",
+#   subtitle = "Number of mentions as main character in combination with Perry Rhodan, with at least more than 10 mentions",
+#   caption = caption,
+#   x = "Character",
+#   y = "Number of mentions in combination with Perry Rhodan"
+#   ) +
+#   scale_y_continuous(#labels = scales::comma,
+#   limits = c(0, 800),
+#   breaks = seq(0, 800, by = 50)) +
+#   #scale_x_continuous(breaks = seq(1985, 2015, by = 1)) +
+#   my_theme +
+#   coord_flip()
+# )
+
+``` 
+
+
+
+# Legal disclaimer and acknowledgement
+
+A big **THANK YOU** to [Perrypedia](https://www.perrypedia.proc.org/). 
+
+Dieser Artikel basiert auf einem Artikel der [Perrypedia](https://www.perrypedia.proc.org/) und ist unter den Bedingungen der [GNU FDL](http://www.gnu.org/copyleft/fdl.html) verfügbar. Autoren und Quelltext sind dort verfügbar. *
+

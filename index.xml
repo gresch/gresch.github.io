@@ -7,8 +7,538 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>gresch</copyright>
-    <lastBuildDate>Tue, 17 Jan 2017 11:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Tue, 12 Sep 2017 11:13:14 -0500</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Creating a Perry Rhodan main series dataset</title>
+      <link>/2017/09/12/201707perryrhodandataset/</link>
+      <pubDate>Tue, 12 Sep 2017 11:13:14 -0500</pubDate>
+      
+      <guid>/2017/09/12/201707perryrhodandataset/</guid>
+      <description>&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;In this post I describe how to create a dataset from scraping information from HTML or a Wiki. &lt;a href=&#34;https://www.perrypedia.proc.org/&#34;&gt;Perrypedia&lt;/a&gt; is a wiki holding information about &lt;strong&gt;Perry Rhodan&lt;/strong&gt; &lt;a href=&#34;https://en.wikipedia.org/wiki/Perry_Rhodan&#34;&gt;Cite&lt;/a&gt;. “&lt;em&gt;Perry Rhodan is the eponymous hero of a German science fiction novel series which has been published each week since 8 September 1961 in the ‘Romanhefte’ format (digest-sized booklets, usually containing 66 pages, the German equivalent of the now-defunct American pulp magazine) by Pabel-Moewig Verlag, a subsidiary of Bauer Media Group.&lt;/em&gt;”&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;/img/wp_PR_2900_1920x1080.jpg&#34; /&gt;
+
+&lt;/div&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.perry-rhodan.net/wallpaper-perry-rhodan-erstauflage.html&#34;&gt;Perry Rhoden Wallpaper&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The data needed for finding out answers to my set questions of interest is found in the aforementioned &lt;a href=&#34;https://www.perrypedia.proc.org/wiki/Hauptseite&#34;&gt;Perrypedia&lt;/a&gt; wiki. For each issue meta data is provided in an HTML table, e.g, &lt;a href=&#34;https://www.perrypedia.proc.org/wiki/Unternehmen_Stardust&#34;&gt;Issue 1&lt;/a&gt;. Meta data includes, &lt;em&gt;series&lt;/em&gt;, &lt;em&gt;season&lt;/em&gt;, &lt;em&gt;title&lt;/em&gt;, &lt;em&gt;subtitle&lt;/em&gt;, &lt;em&gt;author&lt;/em&gt;, &lt;em&gt;title illustrator&lt;/em&gt;, &lt;em&gt;inbound illustrator&lt;/em&gt;, &lt;em&gt;release&lt;/em&gt;, &lt;em&gt;maincharacters&lt;/em&gt;, &lt;em&gt;eventtimeframe&lt;/em&gt;, and &lt;em&gt;locations&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The workflow that I follow is:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;Setup&lt;/li&gt;
+&lt;li&gt;Save HTML files locally from Perrypedia&lt;/li&gt;
+&lt;li&gt;Scrape information from HTML&lt;/li&gt;
+&lt;li&gt;Analyze results and improve scraping, repeat step 3&lt;/li&gt;
+&lt;li&gt;Amend data with for example gender information&lt;/li&gt;
+&lt;li&gt;Save resulting dataset to a CSV file&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;My personal motivation to perform this task is to learn how to scrape information from websites. Moreover, I would like to learn about the &lt;a href=&#34;https://rpubs.com/bradleyboehmke/data_wrangling&#34;&gt;tidyr package&lt;/a&gt; to clean data for further analysis.&lt;/p&gt;
+&lt;p&gt;Legal disclaimer: &lt;em&gt;Dieser Artikel basiert auf einem Artikel der &lt;a href=&#34;https://www.perrypedia.proc.org/&#34;&gt;Perrypedia&lt;/a&gt; und ist unter den Bedingungen der &lt;a href=&#34;http://www.gnu.org/copyleft/fdl.html&#34;&gt;GNU FDL&lt;/a&gt; verfügbar. Autoren und Quelltext sind dort verfügbar. &lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;setup&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Setup&lt;/h1&gt;
+&lt;p&gt;I use the following libraries:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;a href=&#34;https://cran.r-project.org/web/packages/futile.logger/index.html&#34;&gt;futile.logger&lt;/a&gt; for logging&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://tidyverse.org/&#34;&gt;tidyverse&lt;/a&gt; for all relevant packages to manipulate and clean data&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://cran.r-project.org/web/packages/rvest/rvest.pdf&#34;&gt;rvest&lt;/a&gt; to scrape information from website&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://cran.r-project.org/web/packages/gender/gender.pdf&#34;&gt;gender&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# load the tidyverse and other libraries
+library(futile.logger)
+library(tidyverse)
+library(rvest)
+library(stringr)
+library(gender)
+flog.trace(&amp;quot;libraries loaded&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Setup of useful constants:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# set logging threshold
+flog.threshold(INFO)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## NULL&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# issue numbers to handle
+c_issue_load_from &amp;lt;- 2899
+c_issue_load_to &amp;lt;- 2898
+
+c_issue_scrape_from &amp;lt;- 2899
+c_issue_scrape_to &amp;lt;- 2899
+
+
+c_url_base &amp;lt;- &amp;quot;https://www.perrypedia.proc.org/wiki/Quelle:PR&amp;quot;
+c_folder_html &amp;lt;- &amp;quot;C:/tmp/&amp;quot;
+C_folder_csv &amp;lt;- &amp;quot;C:/tmp/&amp;quot;
+c_file_issues_cvs &amp;lt;- &amp;quot;PR_main_issues.csv&amp;quot;
+c_file_characters_cvs &amp;lt;- &amp;quot;PR_main_characters.csv&amp;quot;
+c_file_character_combinations_cvs &amp;lt;- &amp;quot;PR_main_character_combinations.csv&amp;quot;
+c_file_locations_cvs &amp;lt;- &amp;quot;PR_main_locations.csv&amp;quot;
+
+c_xpath_base &amp;lt;-
+  &amp;#39;//*[@id=&amp;quot;mw-content-text&amp;quot;]/div[contains(@class, &amp;quot;perrypedia_std_rframe&amp;quot;)]/table/tr[&amp;#39;
+
+flog.trace(&amp;quot;constants set&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then I setup a new dataframe that represents the information structure:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;season&lt;/li&gt;
+&lt;li&gt;title&lt;/li&gt;
+&lt;li&gt;subtitle&lt;/li&gt;
+&lt;li&gt;author&lt;/li&gt;
+&lt;li&gt;release&lt;/li&gt;
+&lt;li&gt;maincharacters&lt;/li&gt;
+&lt;li&gt;eventtimeframe&lt;/li&gt;
+&lt;li&gt;locations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;save-html-files-locally-from-perrypedia&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Save HTML files locally from Perrypedia&lt;/h1&gt;
+&lt;p&gt;The benefits of downloading all HTMl files include that I can perform any number of scraping attempts without getting it off the web every time – This saves resources and time – and that I can work on this project while I am offline.&lt;/p&gt;
+&lt;p&gt;The URLs for each issue of the main series are like this &lt;code&gt;https://www.perrypedia.proc.org/wiki/Quelle:PR2903&lt;/code&gt;, where the last four digits are the number of the issue. To build the URLs I need, I created a function.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_get_issue_urls &amp;lt;- function(from = 2900, to = 2901) {
+  for (i in from:to) {
+    tmp &amp;lt;- str_c(c_url_base, i)
+    if (i == from) {
+      result_vector &amp;lt;- rbind(tmp)
+    } else {
+      result_vector &amp;lt;- result_vector %&amp;gt;%
+        rbind(tmp)
+    }
+  }
+  
+  return(result_vector)
+}
+
+#pr_get_issue_urls()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following function reads a web page and saves it to the given folder.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_get_html &amp;lt;- function(issue_number) {
+  
+  # read html page
+  read_html &amp;lt;- read_html(paste(c_url_base, issue_number, sep = &amp;quot;&amp;quot;))
+  flog.trace(&amp;quot;got html for url: %s&amp;quot;, paste(c_url_base, issue_number, sep = &amp;quot;&amp;quot;))
+  
+  #save html
+  write_xml(read_html, file = paste(c_folder_html, issue_number, &amp;quot;.html&amp;quot;, sep = &amp;quot;&amp;quot;))
+  flog.trace(&amp;quot;wrote html to: %s&amp;quot;, paste(c_folder_html, issue_number, &amp;quot;.html&amp;quot;, sep = &amp;quot;&amp;quot;))
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The following loop then saves all issues from 1 to 2899 to the folder.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;for (i in c_issue_load_from : c_issue_load_to) {
+  pr_get_html(i)
+}
+
+flog.info(&amp;quot;got HTML from issue %s to issue %s&amp;quot;, c_issue_load_from, c_issue_load_to)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## INFO [2017-09-12 10:04:01] got HTML from issue 2899 to issue 2898&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;scrape-information-from-html&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Scrape information from HTML&lt;/h1&gt;
+&lt;p&gt;In order to scrape the information that is contained in the HTML page, I need to find the &lt;strong&gt;xpath query&lt;/strong&gt; that is &lt;code&gt;//*[@id=&amp;quot;mw-content-text&amp;quot;]/div[contains(@class, &amp;quot;perrypedia_std_rframe&amp;quot;)]/table/tr[i]&lt;/code&gt;, where i is a number between 2 and 12. I store the xpath query in the var &lt;code&gt;c_xpath_base&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series &amp;lt;- tibble(&amp;quot;series&amp;quot;, &amp;quot;season&amp;quot;, &amp;quot;title&amp;quot;, &amp;quot;subtitle&amp;quot;, &amp;quot;author&amp;quot;, &amp;quot;title_pic&amp;quot;, &amp;quot;inbound_ill&amp;quot;, &amp;quot;release&amp;quot;, &amp;quot;maincharacters&amp;quot;, &amp;quot;eventtimeframe&amp;quot;, &amp;quot;locations&amp;quot;) 
+flog.trace(&amp;quot;structure setup&amp;quot;)
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, &amp;quot;.html&amp;quot;, sep = &amp;quot;&amp;quot;)
+  
+  # position of table rows
+  from &amp;lt;- 2
+  to &amp;lt;- 12
+  
+  # intiate result vector
+  result_vector &amp;lt;- c()
+  
+  # read html page
+  read_html &amp;lt;- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    tmp &amp;lt;- read_html %&amp;gt;%
+      html_nodes(xpath = str_c(c_xpath_base, i, &amp;quot;]&amp;quot;)) %&amp;gt;%
+      html_text() %&amp;gt;%
+      str_replace_all(&amp;quot;\n&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;%
+      str_split(&amp;quot;:&amp;quot;)
+    
+    #flog.trace(&amp;quot;try to bind metadata to result_vector in function pr_read_metadata: %s&amp;quot;,
+    #           tmp)
+    
+    result_vector &amp;lt;- tryCatch({
+      result_vector %&amp;gt;%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error(&amp;quot;could not bind: %s&amp;quot;, cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+  }
+  
+  pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+    rbind(result_vector[, 1])
+  flog.trace(&amp;quot;bound %s: &amp;quot;, result_vector[, 1])
+}
+
+flog.info(&amp;quot;scraped metadata from issue %s to issue %s&amp;quot;, c_issue_scrape_from, c_issue_scrape_to)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## INFO [2017-09-12 10:04:01] scraped metadata from issue 2899 to issue 2899&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;analyse-results-and-improve-scraping-repeat-step-3&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Analyse results and improve scraping, repeat step 3&lt;/h1&gt;
+&lt;p&gt;For some issues (and hence HTML pages and tables) the setting of second’s until twelfth’s attribute does not work. For example, issue 500 is set differently. The information is stored in 3-13. Hence, I amend the script to account for that. Moreover, there are exactly two issues without a release date and some issues without an inbound illustrator.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series &amp;lt;- tibble(&amp;quot;series&amp;quot;, &amp;quot;season&amp;quot;, &amp;quot;title&amp;quot;, &amp;quot;subtitle&amp;quot;, &amp;quot;author&amp;quot;, &amp;quot;title_pic&amp;quot;, &amp;quot;inbound_ill&amp;quot;, &amp;quot;release&amp;quot;, &amp;quot;maincharacters&amp;quot;, &amp;quot;eventtimeframe&amp;quot;, &amp;quot;locations&amp;quot;) 
+flog.trace(&amp;quot;structure setup&amp;quot;)
+
+# vector with issues that do not have a release date -&amp;gt; need to add a NA
+issues_wo_releasedate &amp;lt;- c(1292, 1573) 
+
+# vector with issues that do not have an inbound illustrator -&amp;gt; need to add a NA
+issues_wo_inill &amp;lt;-
+  c(1301, 
+    1576,
+    1795,
+    1796,
+    1797,
+    1799,
+    1907,
+    1908,
+    1909,
+    1910,
+    1912,
+    1913,
+    1914,
+    1915,
+    1917,
+    1919,
+    1920,
+    1921,
+    1922,
+    1927,
+    1929,
+    1931,
+    1935,
+    1936,
+    1941,
+    1943,
+    1951,
+    1954,
+    1955,
+    1956,
+    1959,
+    1960,
+    1961,
+    1962,
+    1965,
+    2383,
+    2500
+  )
+
+
+# for all issues to analyze
+for (k in c_issue_scrape_from : c_issue_scrape_to) {
+  
+  # get URL for issue
+  tmpurl = paste(c_folder_html, k, &amp;quot;.html&amp;quot;, sep = &amp;quot;&amp;quot;)
+  
+  # position of table rows
+  from &amp;lt;- 2
+  to &amp;lt;- 12
+  
+  if (k == 500 |
+      k == 700 |
+      k == 800 |
+      k == 900 |
+      k == 1000 |
+      k == 1100 |
+      k == 1200 |
+      k == 1300 |
+      k == 1400 |
+      k == 1500 |
+      k == 1600 |
+      k == 1700 |
+      k == 1800 |
+      k == 1900 |
+      k == 2000 |
+      k == 2700 |
+      k == 2750 |
+      k == 2800) {
+    from &amp;lt;- 3
+    to &amp;lt;- 13
+    flog.trace(&amp;quot;must be a start of a new cycle&amp;quot;)
+  }
+  
+  # intiate result vector
+  result_vector &amp;lt;- c()
+  
+  # read html page
+  read_html &amp;lt;- read_html(tmpurl)
+  
+  # for all attributes
+  for (i in from:to) {
+    
+    # for all issues without an inbound illustrator
+    if (k %in% issues_wo_inill &amp;amp; i == 8) {
+      result_vector &amp;lt;- result_vector %&amp;gt;%
+        rbind(NA)
+    } 
+    
+    # for all issues without a release date
+    if (k %in% issues_wo_releasedate &amp;amp; i == 9) {
+      result_vector &amp;lt;- result_vector %&amp;gt;%
+        rbind(NA)
+    } 
+    
+    tmp &amp;lt;- read_html %&amp;gt;%
+      html_nodes(xpath = str_c(c_xpath_base, i, &amp;quot;]&amp;quot;)) %&amp;gt;%
+      html_text() %&amp;gt;%
+      str_replace_all(&amp;quot;\n&amp;quot;, &amp;quot;&amp;quot;) %&amp;gt;%
+      str_split(&amp;quot;:&amp;quot;)
+    
+    #flog.trace(&amp;quot;try to bind metadata to result_vector in function pr_read_metadata: %s&amp;quot;,
+    #           tmp)
+    
+    result_vector &amp;lt;- tryCatch({
+      result_vector %&amp;gt;%
+        rbind(tmp[[1]][[2]])
+    },
+    error = function(cond) {
+      flog.error(&amp;quot;could not bind: %s&amp;quot;, cond)
+      # Choose a return value in case of error
+      #return(NA)
+    })
+    
+  }
+  
+  pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+    rbind(result_vector[, 1])
+  flog.trace(&amp;quot;bound %s: &amp;quot;, result_vector[, 1])
+}
+
+flog.info(&amp;quot;scraped metadata from issue %s to issue %s&amp;quot;, c_issue_scrape_from, c_issue_scrape_to)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## INFO [2017-09-12 10:04:01] scraped metadata from issue 2899 to issue 2899&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series &amp;lt;- pr_main_series[-1,]
+names(pr_main_series) &amp;lt;- gsub(&amp;quot;\&amp;quot;&amp;quot;, &amp;quot;&amp;quot;, names(pr_main_series), fixed = TRUE)
+flog.trace(&amp;quot;cleaned data structure&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;amend-data-with-for-example-gender-information&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Amend data with for example gender information&lt;/h1&gt;
+&lt;p&gt;The resulting data set is captured. Nevertheless, we can compute additional variables with the given variables. I try to capture this additional information:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;The release year from the release information, which is not structured&lt;/li&gt;
+&lt;li&gt;Gender information for all authors based on first names&lt;/li&gt;
+&lt;li&gt;Extract issue number&lt;/li&gt;
+&lt;li&gt;Extract additional data sets for locations and main characters&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div id=&#34;release-year&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Release year&lt;/h2&gt;
+&lt;p&gt;Release information is provided as 1) &lt;em&gt;Freitag, 8. September 1961&lt;/em&gt;, 2) &lt;em&gt;1961&lt;/em&gt;, or 3) &lt;em&gt;April 1999&lt;/em&gt;. To get the year, I try to get the last four characters.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;head(pr_main_series$release)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] &amp;quot;Freitag, 10. März 2017&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series$release_year &amp;lt;- as.numeric(substr(pr_main_series$release, nchar(pr_main_series$release)-3, nchar(pr_main_series$release)))
+
+pr_main_series %&amp;gt;% 
+  filter(is.na(release_year))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 0 × 12
+## # ... with 12 variables: series &amp;lt;chr&amp;gt;, season &amp;lt;chr&amp;gt;, title &amp;lt;chr&amp;gt;,
+## #   subtitle &amp;lt;chr&amp;gt;, author &amp;lt;chr&amp;gt;, title_pic &amp;lt;chr&amp;gt;, inbound_ill &amp;lt;chr&amp;gt;,
+## #   release &amp;lt;chr&amp;gt;, maincharacters &amp;lt;chr&amp;gt;, eventtimeframe &amp;lt;chr&amp;gt;,
+## #   locations &amp;lt;chr&amp;gt;, release_year &amp;lt;dbl&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# set all NAs to correct values
+pr_main_series &amp;lt;- 
+  pr_main_series %&amp;gt;% 
+  mutate(release_year = replace(release_year, grepl(&amp;#39;1292&amp;#39;, series), 1986))
+
+pr_main_series &amp;lt;- 
+  pr_main_series %&amp;gt;% 
+  mutate(release_year = replace(release_year, grepl(&amp;#39;1573&amp;#39;, series), 1991))
+
+pr_main_series &amp;lt;- 
+  pr_main_series %&amp;gt;% 
+  mutate(release_year = replace(release_year, grepl(&amp;#39;2472&amp;#39;, series), 2008))
+
+pr_main_series &amp;lt;- 
+  pr_main_series %&amp;gt;% 
+  mutate(release_year = replace(release_year, grepl(&amp;#39;2680&amp;#39;, series), 2012))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;extract-issue-number&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Extract issue number&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series$series &amp;lt;- sub(&amp;quot;\\).*&amp;quot;, &amp;quot;&amp;quot;, sub(&amp;quot;.*\\(&amp;quot;, &amp;quot;&amp;quot;, pr_main_series$series)) 
+
+pr_main_series&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 1 × 12
+##      series       season            title
+##       &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;chr&amp;gt;
+## 1 Band 2899 Sternengruft Die Sternengruft
+## # ... with 9 more variables: subtitle &amp;lt;chr&amp;gt;, author &amp;lt;chr&amp;gt;,
+## #   title_pic &amp;lt;chr&amp;gt;, inbound_ill &amp;lt;chr&amp;gt;, release &amp;lt;chr&amp;gt;,
+## #   maincharacters &amp;lt;chr&amp;gt;, eventtimeframe &amp;lt;chr&amp;gt;, locations &amp;lt;chr&amp;gt;,
+## #   release_year &amp;lt;dbl&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;extract-double-authorship&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Extract double authorship&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# harmonize deliminator
+
+pr_main_series &amp;lt;-
+  pr_main_series %&amp;gt;%
+  mutate(author = str_replace(author, &amp;quot; &amp;amp; &amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot; / &amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot; /&amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot;/ &amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot;/&amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot;, &amp;quot;, &amp;quot; - &amp;quot;)) %&amp;gt;% 
+  mutate(author = str_replace(author, &amp;quot; und &amp;quot;, &amp;quot; - &amp;quot;)) 
+  
+# first split the characters
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  separate(author, c(&amp;quot;a1&amp;quot;, &amp;quot;a2&amp;quot;), sep = &amp;quot; - &amp;quot;)
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  gather(author_pos, author, a1, a2, na.rm = TRUE) %&amp;gt;% 
+  arrange(series)
+
+# Get rid of dubletes
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  mutate(author = replace(author, grepl(&amp;#39;Scheer&amp;#39;, author), &amp;quot;K. H. Scheer&amp;quot;))
+
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  mutate(author = replace(author, grepl(&amp;#39;Francis&amp;#39;, author), &amp;quot;H. G. Francis&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;authors-gender-information&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Authors’ gender information&lt;/h2&gt;
+&lt;p&gt;First, I extract first names from the author variable. Then I extract a new data set with all authors, that I apply the &lt;a href=&#34;https://cran.r-project.org/web/packages/gender/gender.pdf&#34;&gt;&lt;strong&gt;gender&lt;/strong&gt; package&lt;/a&gt; to classify authors with their gender. Following that I will add manually gender information where the package did not conclude anything. Finally, I join the gender information back to the main data set.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# separate first and last names
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  separate(author, c(&amp;quot;author_firstname&amp;quot;, &amp;quot;author_lastname&amp;quot;), remove = FALSE)
+
+# create new data set
+pr_author &amp;lt;- pr_main_series %&amp;gt;% 
+  select(author_firstname, author_lastname, author) %&amp;gt;% 
+  distinct(author_firstname, author_lastname, author) %&amp;gt;% 
+  arrange(author_lastname)
+
+# find gender for first names
+names_and_gender &amp;lt;- gender(unique(pr_author$author_firstname), method = &amp;quot;napp&amp;quot;)
+pr_author &amp;lt;- pr_author %&amp;gt;% 
+  left_join(names_and_gender, by = c(&amp;quot;author_firstname&amp;quot; = &amp;quot;name&amp;quot;)) %&amp;gt;% 
+  select(author_firstname, author_lastname, author, gender) %&amp;gt;% 
+  arrange(desc(gender))
+
+rm(names_and_gender)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are 12 authors where the &lt;strong&gt;gender package&lt;/strong&gt; could not conclude the gender (cf. table below). I will set them all to male.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_author %&amp;gt;% 
+  filter(is.na(gender))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 1 × 4
+##   author_firstname author_lastname    author gender
+##              &amp;lt;chr&amp;gt;           &amp;lt;chr&amp;gt;     &amp;lt;chr&amp;gt;  &amp;lt;lgl&amp;gt;
+## 1              Uwe           Anton Uwe Anton     NA&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# set all NAs to male
+pr_author &amp;lt;- pr_author %&amp;gt;% 
+  mutate(gender = replace(gender, is.na(gender) , &amp;quot;male&amp;quot;))
+
+pr_author$gender &amp;lt;- as.factor(pr_author$gender)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, I join the gender information to the main data set.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  select(-author_firstname, -author_lastname) %&amp;gt;% 
+  left_join(pr_author, by = c(&amp;quot;author&amp;quot; = &amp;quot;author&amp;quot;))
+
+pr_main_series &amp;lt;- pr_main_series %&amp;gt;% 
+  select(-author_firstname, -author_lastname) 
+
+rm(pr_author)
+
+pr_main_series&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 1 × 14
+##      series       season            title
+##       &amp;lt;chr&amp;gt;        &amp;lt;chr&amp;gt;            &amp;lt;chr&amp;gt;
+## 1 Band 2899 Sternengruft Die Sternengruft
+## # ... with 11 more variables: subtitle &amp;lt;chr&amp;gt;, title_pic &amp;lt;chr&amp;gt;,
+## #   inbound_ill &amp;lt;chr&amp;gt;, release &amp;lt;chr&amp;gt;, maincharacters &amp;lt;chr&amp;gt;,
+## #   eventtimeframe &amp;lt;chr&amp;gt;, locations &amp;lt;chr&amp;gt;, release_year &amp;lt;dbl&amp;gt;,
+## #   author_pos &amp;lt;chr&amp;gt;, author &amp;lt;chr&amp;gt;, gender &amp;lt;fctr&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;extract-additional-data-sets-for-locations-and-main-characters&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Extract additional data sets for locations and main characters&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# Main characters
+
+pr_main_character &amp;lt;- pr_main_series %&amp;gt;% 
+  select(series, maincharacters, author, gender, author_pos, release_year)
+
+# first split the characters
+pr_main_character &amp;lt;- pr_main_character %&amp;gt;% 
+  separate(maincharacters, c(&amp;quot;C1&amp;quot;, &amp;quot;C2&amp;quot;, &amp;quot;C3&amp;quot;, &amp;quot;C4&amp;quot;, &amp;quot;C5&amp;quot;, &amp;quot;C6&amp;quot;), sep = &amp;quot;, &amp;quot;)
+
+# second gather characters (making a wide dataframe into a long one)
+pr_main_character &amp;lt;- pr_main_character %&amp;gt;% 
+    gather(character_pos, maincharacter_name, C1, C2, C3, C4, C5, C6, na.rm = TRUE) %&amp;gt;% 
+  arrange(series)
+
+# main character combinations
+
+
+
+tmp &amp;lt;- pr_main_character %&amp;gt;% 
+    select(series, maincharacter_name, release_year) 
+  
+  pr_main_character_combinations &amp;lt;-
+    expand.grid(unique(as.factor(tmp$maincharacter_name)), unique(as.factor(tmp$maincharacter_name)))
+  #get vector of all titles that each author worked on
+  lauth &amp;lt;- tapply(as.factor(tmp$series), as.factor(tmp$maincharacter_name), FUN=function(x) paste(x)) 
+  myfun &amp;lt;- function(x,y) sum(lauth[[x]] %in% lauth[[y]]) #function
+  
+  flog.trace(&amp;quot;apply function to columns of dataframe, might take a long time&amp;quot;)
+  pr_main_character_combinations$count &amp;lt;- mapply(myfun, x=pr_main_character_combinations$Var2, y=pr_main_character_combinations$Var1) 
+  
+  # remove all combinations with count 0
+  pr_main_character_combinations &amp;lt;- pr_main_character_combinations %&amp;gt;% 
+    filter(count &amp;gt; 0)
+  
+  # change var names
+  pr_main_character_combinations &amp;lt;- pr_main_character_combinations %&amp;gt;% 
+    select(character_1 = Var1, character_2 = Var2, count = count)
+  
+  rm(tmp, lauth, myfun)
+  
+
+# locations
+
+pr_location &amp;lt;- pr_main_series %&amp;gt;% 
+  select(series, locations, author, gender, author_pos, release_year)
+
+# first split the locations
+pr_location &amp;lt;- pr_location %&amp;gt;% 
+  separate(locations, c(&amp;quot;l1&amp;quot;, &amp;quot;l2&amp;quot;, &amp;quot;l3&amp;quot;, &amp;quot;l4&amp;quot;, &amp;quot;l5&amp;quot;, &amp;quot;l6&amp;quot;, &amp;quot;l7&amp;quot;), sep = &amp;quot;, &amp;quot;)
+
+# second gather locations (making a wide dataframe into a long one)
+pr_location &amp;lt;- pr_location %&amp;gt;% 
+    gather(location_pos, location_name, l1, l2, l3, l4, l5, l6, l7, na.rm = TRUE) %&amp;gt;% 
+  arrange(series)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;save-resulting-dataset-to-a-csv-file&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Save resulting dataset to a CSV file&lt;/h1&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;write_csv(pr_main_series, paste(C_folder_csv, c_file_issues_cvs, sep = &amp;quot;&amp;quot;), append = FALSE)
+write_csv(pr_main_character, paste(C_folder_csv, c_file_characters_cvs, sep = &amp;quot;&amp;quot;), append = FALSE)
+write_csv(pr_location, paste(C_folder_csv, c_file_locations_cvs, sep = &amp;quot;&amp;quot;), append = FALSE)
+write_csv(pr_main_character_combinations, paste(C_folder_csv, c_file_character_combinations_cvs, sep = &amp;quot;&amp;quot;), append = FALSE)
+
+flog.info(&amp;quot;wrote csv&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## INFO [2017-09-12 10:04:03] wrote csv&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;In this blog, I created three &lt;strong&gt;Perry Rhodan&lt;/strong&gt; datasets out of information available on the &lt;strong&gt;Perrypedia&lt;/strong&gt; wiki. I learned and improved my understanding of:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;How to scrape information from web pages&lt;/li&gt;
+&lt;li&gt;Use basics like the &lt;code&gt;%in%&lt;/code&gt; operator&lt;/li&gt;
+&lt;li&gt;How to clean data&lt;/li&gt;
+&lt;li&gt;How to apply the gender package.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;You find the generated files on my &lt;a href=&#34;https://github.com/gresch/datasets&#34;&gt;GitHub Repo&lt;/a&gt;.&lt;/p&gt;
+&lt;dl&gt;
+&lt;dt&gt;Please feel free to ask me any questions or point out better solutions to some of the things I did.&lt;/dt&gt;
+&lt;dd&gt;&lt;p&gt;gresch&lt;/p&gt;
+&lt;/dd&gt;
+&lt;/dl&gt;
+&lt;/div&gt;
+</description>
+    </item>
     
     <item>
       <title>A brief analysis of available open data on Oktoberfest in Munich, Germany from 1985 until 2015</title>
@@ -16,11 +546,7 @@
       <pubDate>Tue, 17 Jan 2017 11:13:14 -0500</pubDate>
       
       <guid>/2017/01/17/201701oktoberfest1985-2015/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;div class=&#34;figure&#34;&gt;
+      <description>&lt;div class=&#34;figure&#34;&gt;
 &lt;img src=&#34;https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/M%C3%BCnchen%2C_L%C3%B6wenbr%C3%A4u-Festhalle%2C_Oktoberfest_2012_%2803%29.jpg/1200px-M%C3%BCnchen%2C_L%C3%B6wenbr%C3%A4u-Festhalle%2C_Oktoberfest_2012_%2803%29.jpg&#34; alt=&#34;München, Löwenbräu-Festhalle, Oktoberfest 2012 (03).jpg, CC BY 3.0&#34; /&gt;
 &lt;p class=&#34;caption&#34;&gt;München, Löwenbräu-Festhalle, Oktoberfest 2012 (03).jpg, &lt;a href=&#34;http://creativecommons.org/licenses/by/3.0&#34; title=&#34;Creative Commons Attribution 3.0&#34;&gt;CC BY 3.0&lt;/a&gt;&lt;/p&gt;
 &lt;/div&gt;
@@ -184,7 +710,7 @@ ggplot(data) +
     breaks = seq(0, 8000000, by = 1000000)) +
   scale_x_continuous(breaks = seq(1985, 2015, by = 1)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;3000&#34; /&gt; Over the 31 years, on average, 6,341,935 people visited the Oktoberfest each year. What is interesting to note is that there was a major decline in visitors just after &lt;strong&gt;9/11&lt;/strong&gt; in year 2001 – Oktoberfest starts usually end of September each year. The trend of yearly visitors looks the same as for the average daily visitors.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;3000&#34; /&gt; Over the 31 years, on average, 6,341,935 people visited the Oktoberfest each year. What is interesting to note is that there was a major decline in visitors just after &lt;strong&gt;9/11&lt;/strong&gt; in year 2001 – Oktoberfest starts usually end of September each year. The trend of yearly visitors looks the same as for the average daily visitors.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# show divergence of visitors per year from the mean
 ggplot(data) + 
   geom_bar(aes(year, visitor_year - mean(visitor_year)), 
@@ -205,7 +731,7 @@ ggplot(data) +
   scale_x_continuous(
     breaks = seq(1985, 2015, by = 1)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;3000&#34; /&gt; In this graph it is even better to see that in 1985 the most people visited the Oktoberfest. Then there is a stark decline of visitors with 1988 hitting the bottom with ~600,000 visitors less than average. After that the number of visitors increased until 2001 or &lt;strong&gt;nine-eleven&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;3000&#34; /&gt; In this graph it is even better to see that in 1985 the most people visited the Oktoberfest. Then there is a stark decline of visitors with 1988 hitting the bottom with ~600,000 visitors less than average. After that the number of visitors increased until 2001 or &lt;strong&gt;nine-eleven&lt;/strong&gt;.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;beer-price-development&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Beer price development&lt;/h2&gt;
@@ -228,7 +754,7 @@ ggplot(data) +
   scale_x_continuous(
     breaks = seq(1985, 2015, by = 1)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Not surprisingly, the beer price increased over the years. starting in 1985 with 3.20€ and hitting 10.75€ in 2015. That would be an average yearly increase of &lt;span class=&#34;math display&#34;&gt;\[(10.27 - 3.20) / 30 = 0.2356667\]&lt;/span&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# show beer price increase based on former year
 data %&amp;gt;%
@@ -251,7 +777,7 @@ data %&amp;gt;%
     breaks = seq(1985, 2016, by = 1), 
     limits = c(1985, 2016)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Interestingly, in 1991 there was, on average, a major increase of 0.44€ per beer compared to 1990. Why would that be? The following years the increase levels off until 1996 to rise again with the year 2000 showing a major increase of 0.55€ compared to 1999, which is more than double than the average increase over time.&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;beer-sold-over-the-years&#34; class=&#34;section level2&#34;&gt;
@@ -274,7 +800,7 @@ data %&amp;gt;%
     breaks = seq(1985, 2016, by = 1), 
     limits = c(1985, 2016)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;On average, each year on each day 372,837 liters of beer was sold. The bar chart looks multimodel with a peak in 1999 and a low in 2001 (where less people visited the Oktoberfest). Since then, the amount of beer sold is increasing.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(data) + 
   geom_bar(aes(year, beer_sold / duration_days / visitor_day), 
@@ -294,7 +820,7 @@ data %&amp;gt;%
     breaks = seq(1985, 2015, by = 1), 
     limits = c(1984, 2016)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;chicken-price-development&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Chicken price development&lt;/h2&gt;
@@ -317,7 +843,7 @@ ggplot(data) +
   scale_x_continuous(
     breaks = seq(1985, 2015, by = 1)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The chicken price increased over the years until 1995 to fall slightly. However a huge increase was in the year 2000. The price was increased by 2.47€ more than twelve times the average price increase. Starting in 1985 with 4.77€ and hitting 10.75€ in 2015. That would be an average yearly increase of &lt;span class=&#34;math display&#34;&gt;\[(10.75 - 4.77) / 30 = 0.199333\]&lt;/span&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# show chicken price increase based on former year
 data %&amp;gt;%
@@ -340,7 +866,7 @@ data %&amp;gt;%
     breaks = seq(1985, 2016, by = 1), 
     limits = c(1984, 2016)) + 
   r_90_d + my_theme&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201701Oktoberfest1985-2015_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;3000&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Interestingly, in 1986 the price for chicken dropped four times the average with then a steady increase until 1986. Then in the year 2000 the aforementioned rise of 2.47€. Also, in 2013 we saw a major price increase compared to 2012, namely 1.03€.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
@@ -366,14 +892,6 @@ data %&amp;gt;%
 &lt;/ul&gt;
 &lt;p&gt;If you have any feedback on the analysis, the approach or tools, please feel free to contact me.&lt;/p&gt;
 &lt;/div&gt;
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
 </description>
     </item>
     
@@ -383,11 +901,7 @@ data %&amp;gt;%
       <pubDate>Tue, 22 Nov 2016 21:13:14 -0500</pubDate>
       
       <guid>/2016/11/22/201611_gganimate_packages_functionality_examples_using_gapminder_data/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;p&gt;I recently found an interesting R package that animates &lt;strong&gt;ggplot2&lt;/strong&gt; plots, namely &lt;a href=&#34;https://github.com/dgrtwo/gganimate&#34;&gt;gganimate&lt;/a&gt;. This &lt;a href=&#34;http://rmarkdown.rstudio.com/r_notebooks.html&#34;&gt;notebook&lt;/a&gt; shows some functionalities of it, solely for learning purposes. As a test data set I use &lt;a href=&#34;https://www.gapminder.org/data/&#34;&gt;gapminder&lt;/a&gt; like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_&lt;/p&gt;
+      <description>&lt;p&gt;I recently found an interesting R package that animates &lt;strong&gt;ggplot2&lt;/strong&gt; plots, namely &lt;a href=&#34;https://github.com/dgrtwo/gganimate&#34;&gt;gganimate&lt;/a&gt;. This &lt;a href=&#34;http://rmarkdown.rstudio.com/r_notebooks.html&#34;&gt;notebook&lt;/a&gt; shows some functionalities of it, solely for learning purposes. As a test data set I use &lt;a href=&#34;https://www.gapminder.org/data/&#34;&gt;gapminder&lt;/a&gt; like in the examples of the gganimate package. Nevertheless, I am interested, whether it would support in me in these areas_&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;Data analysis, i.e., does it help to generate insights more efficiently?&lt;/li&gt;
 &lt;li&gt;Data visualization, i.e., does it help to better communicate findings?&lt;/li&gt;
@@ -649,7 +1163,7 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot(gapminder) +
   geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
   scale_x_log10()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;What are &lt;em&gt;possible&lt;/em&gt; ways to look at the &lt;em&gt;development&lt;/em&gt; of these variables over time (e.g., years)? Here are some means:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;Scatter plot: use of &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/li&gt;
@@ -662,7 +1176,7 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
   geom_point(aes(gdpPercap, lifeExp, color = continent)) + 
   scale_x_log10() + 
   facet_grid(~year)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;area-show-averages-and-use-facet_gridyear&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Area: Show averages and use &lt;code&gt;facet_grid(~year)&lt;/code&gt;&lt;/h3&gt;
@@ -675,7 +1189,7 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
   geom_area(aes(meanGdpPercap, meanLifeExp), stat = &amp;quot;identity&amp;quot;) +
   scale_x_log10() +
   facet_grid(~year)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;animated-plots&#34; class=&#34;section level1&#34;&gt;
@@ -687,13 +1201,13 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;&amp;gt; gg_animate(ggplot(gapminder) +
 +             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
 +             scale_x_log10())&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-9-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;A &lt;code&gt;facet_grid(~continent)&lt;/code&gt; further allows now a differentiation on the individual continent developments.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;&amp;gt; gg_animate(ggplot(gapminder) +
 +             geom_point(aes(gdpPercap, lifeExp, color = continent, frame = year)) + 
 +             scale_x_log10() +
 +              facet_grid(~continent)) &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-10-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;line-chart&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;Line chart&lt;/h3&gt;
@@ -704,7 +1218,7 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 +   ggplot() +
 +   geom_line(aes(meanGdpPercap, meanLifeExp, frame = year), stat = &amp;quot;identity&amp;quot;) +
 +   scale_x_log10()) &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;#####../content/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-2.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-3.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-4.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-5.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-6.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-7.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-8.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-9.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-10.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-11.png&#34; width=&#34;672&#34; /&gt;&lt;img src=&#34;/post/201611_gganimate_Packages_functionality_examples_using_Gapminder_data_files/figure-html/unnamed-chunk-11-12.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;conclusion&#34; class=&#34;section level1&#34;&gt;
@@ -715,14 +1229,6 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 &lt;p&gt;&lt;strong&gt;2. Data visualiazation, i.e., does it help to better communicate findings? &lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;In terms of data visualization I believe &lt;strong&gt;gganimate&lt;/strong&gt; is helpful. The &lt;em&gt;frame&lt;/em&gt; provides another dimension to a plot without the need to use color, sizes, or other means that might clutter the plot. Another advantage is that I can tell a story and its &lt;em&gt;development&lt;/em&gt; over time (or other variable). Lastly, I think adding animation to visualization is much more compelling and people might &lt;em&gt;engange&lt;/em&gt; much more with the plot.&lt;/p&gt;
 &lt;/div&gt;
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
 </description>
     </item>
     
@@ -759,12 +1265,12 @@ library(dplyr)           # package for data transformation&lt;/code&gt;&lt;/pre&
 
 &lt;h1 id=&#34;process-example&#34;&gt;Process example&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;./img/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/ExampleBPMNDiagram.jpg&#34; alt=&#34;Process example&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;result&#34;&gt;Result&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;./img/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
-&lt;img src=&#34;./img/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/img/ExampleBPMNXLS.jpg&#34; alt=&#34;Result&#34; /&gt;
+&lt;img src=&#34;/img/ExampleBPMNPivot.jpg&#34; alt=&#34;Result&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
@@ -791,11 +1297,7 @@ gresch&lt;/p&gt;
       <pubDate>Mon, 20 Oct 2014 02:13:50 +0000</pubDate>
       
       <guid>/2014/10/20/201410_p-value_same_sex_and_education_analysis/</guid>
-      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
-
-/BLOGDOWN-BODY-BEFORE --&gt;
-
-&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
+      <description>&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;This document summarizes my project I did for the Coursera &lt;a href=&#34;https://www.coursera.org/specializations/statistics&#34;&gt;Master Statistics with R&lt;/a&gt; class. I decided to explore the following question: “&lt;strong&gt;Is there a relationship between strong opinions on same sex relationships and years of education?&lt;/strong&gt;”.&lt;/p&gt;
 &lt;p&gt;The world changes. And as it changes people and states become more liberal – even when it comes to topics of same sex relationships. A strong belief that same sex relationships are wrong may root in religion or family values. However, as the Economist explains (&lt;a href=&#34;http://www.economist.com/node/17227800?story_id=17227800&#34; class=&#34;uri&#34;&gt;http://www.economist.com/node/17227800?story_id=17227800&lt;/a&gt;), in 1995 fewer than half of Americans (48%) are opposed to gay marriage, while 42% are in favour. Today same sex marriage is legal in more than 30 states in the U.S. (&lt;a href=&#34;http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx&#34; class=&#34;uri&#34;&gt;http://www.ncsl.org/research/human-services/same-sex-marriage-laws.aspx&lt;/a&gt;). In regard of this development I find it worthwhile to understand not only the legal adoption of same-sex relationships, but also how the public adopts to the liberation of same sex relationships. While there exist data analyses on opinion on same sex relationships with respect to religion (&lt;a href=&#34;http://www.economist.com/node/17227800?story_id=17227800&#34; class=&#34;uri&#34;&gt;http://www.economist.com/node/17227800?story_id=17227800&lt;/a&gt;) no analysis with respect to years of education exists to the best of my knowledge.&lt;/p&gt;
@@ -857,7 +1359,7 @@ educhist &amp;lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) +
 educdegreehist &amp;lt;- ggplot(gssNA, aes(x = educ)) + geom_histogram(binwidth = 1) + facet_wrap(~degree) + labs(title = &amp;quot;Histogram of HIGHEST YEAR OF SCHOOL COMPLETED, separated by degree&amp;quot;, x = &amp;quot;HIGHEST YEAR OF SCHOOL COMPLETED&amp;quot;)
 # Print both histograms
 multiplot(educhist, educdegreehist, cols=2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;strong-opinion-on-homosexual-relations&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Strong OPINION ON HOMOSEXUAL RELATIONS&lt;/h2&gt;
@@ -874,7 +1376,7 @@ barplotall &amp;lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + l
 barplotyears &amp;lt;- ggplot(gssNA, aes(x = strongviewshomosex)) + geom_bar() + facet_wrap(~year) + labs(title = &amp;quot;OPINION ON HOMOSEXUAL RELATIONS, differentiated by year&amp;quot;, y = &amp;quot;Count&amp;quot;, x = &amp;quot;OPINION ON HOMOSEXUAL RELATIONS&amp;quot;) + coord_flip()
 # Print both histograms
 multiplot(barplotall, barplotyears, cols=2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;inference&#34; class=&#34;section level1&#34;&gt;
@@ -900,9 +1402,9 @@ plotallyears &amp;lt;- ggplot(gssNA, aes(x = educ, fill = strongviewshomosex)) +
 plot2012 &amp;lt;- ggplot(gssNA[gssNA$year == 2012,], aes(x = educ, fill = strongviewshomosex)) + geom_bar(position=&amp;quot;fill&amp;quot;, binwidth = 1) + coord_flip() + labs(title=&amp;quot;DISTRIBUTION FOR 2012&amp;quot;, x = &amp;quot;HIGHEST YEAR OF SCHOOL COMPLETED&amp;quot;, y = &amp;quot;PERCENT&amp;quot;) + theme(legend.position=&amp;quot;bottom&amp;quot;)
 # Print plots
 multiplot(plothist, plotbox, cols=2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;multiplot(plotallyears, plot2012, cols=2)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-8-2.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;In the following I describe the necessary steps for inference. The project question I want to investigate is :“&lt;em&gt;Is there a relationship between strong opinions on same sex relationships and years of education?&lt;/em&gt;”.&lt;/p&gt;
 &lt;div id=&#34;set-the-hypotheses&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Set the hypotheses&lt;/h2&gt;
@@ -955,7 +1457,7 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)&lt;/code&gt;&lt;/pre&gt;
 ## Standard error = 0.04 
 ## Test statistic: Z =  52.072 
 ## p-value =  0&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/201410_p-value_same_sex_and_education_analysis_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;conclusion&#34; class=&#34;section level1&#34;&gt;
@@ -964,14 +1466,6 @@ by(gssNA$educ, gssNA$strongviewshomosex, mean)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The data and the inference show that there is convincing evidence that indeed on average, US citizen that find homosexual relationships &lt;em&gt;Not Wrong At All&lt;/em&gt; have more years of education than US citizen that find homosexual relationships &lt;em&gt;Always Wrong&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;In this project I investigated the following question: “&lt;em&gt;Is there a relationship between strong opinions on same sex relationships and years of education?&lt;/em&gt;”. The data and the inference test confirmed a relationship between respondents’ strong views on same sex relationships and years of education. Respondents who view same sex relationships as &lt;em&gt;Not Wrong At All&lt;/em&gt; have, on average, 14.12 years of education and respondents who view same sex relationships as &lt;em&gt;Always Wrong&lt;/em&gt; have, on average, 12.04 years of education.&lt;/p&gt;
 &lt;/div&gt;
-
-
-&lt;!-- BLOGDOWN-HEAD
-
-
-
-
-/BLOGDOWN-HEAD --&gt;
 </description>
     </item>
     
